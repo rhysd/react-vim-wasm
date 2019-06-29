@@ -1,0 +1,56 @@
+{
+  "name": "react-vim-wasm",
+  "version": "0.0.0",
+  "description": "React component for vim.wasm",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "LICENSE.txt"
+  ],
+  "scripts": {
+    "build:tsc": "tsc -d -p .",
+    "build:parcel": "parcel build -d . -o bundle.js ./example.js",
+    "build": "npm-run-all build:tsc build:parcel",
+    "watch:tsc": "tsc --watch -p .",
+    "watch:parcel": "parcel serve -p 1234 -d . -o bundle.js ./example.js",
+    "watch": "npm-run-all -p watch:tsc watch:parcel",
+    "lint": "prettier --check './*.ts'",
+    "fix": "prettier --write './*.ts'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhysd/react-vim-wasm.git"
+  },
+  "keywords": [
+    "react",
+    "vim",
+    "wasm",
+    "WebAssembly",
+    "editor"
+  ],
+  "author": "rhysd <lin90162@yahoo.co.jp> (https://rhysd.github.io/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rhysd/react-vim-wasm/issues"
+  },
+  "homepage": "https://github.com/rhysd/react-vim-wasm#readme",
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.22",
+    "npm-run-all": "^4.1.5",
+    "parcel-bundler": "^1.12.3",
+    "prettier": "^1.18.2",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "typescript": "^3.5.2"
+  },
+  "dependencies": {
+    "vim-wasm": "0.0.4"
+  }
+}
