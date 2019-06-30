@@ -16,6 +16,7 @@ export interface VimProps {
     className?: string;
     style?: React.CSSProperties;
     autoFocus?: boolean;
+    onVimCreated?: (vim: VimWasm) => void;
 }
 
 export function useVim({
@@ -29,6 +30,7 @@ export function useVim({
     readClipboard,
     onWriteClipboard,
     onError,
+    onVimCreated,
 }: VimProps): [
     ((node: HTMLCanvasElement | null) => void) | null,
     React.MutableRefObject<HTMLInputElement | null> | null,
@@ -58,6 +60,10 @@ export function useVim({
         vim.readClipboard = readClipboard;
         vim.onWriteClipboard = onWriteClipboard;
         vim.onError = onError;
+
+        if (onVimCreated !== undefined) {
+            onVimCreated(vim);
+        }
 
         vim.start({ debug, perf });
         setVim(vim);
