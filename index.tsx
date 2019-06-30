@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { VimWasm, ScreenDrawer } from 'vim-wasm';
 
 export interface VimProps {
@@ -32,7 +32,7 @@ export function useVim({
     onError,
     onVimCreated,
 }: VimProps): [
-    ((node: HTMLCanvasElement | null) => void) | null,
+    React.MutableRefObject<HTMLCanvasElement | null> | null,
     React.MutableRefObject<HTMLInputElement | null> | null,
     VimWasm | null,
 ] {
@@ -41,6 +41,7 @@ export function useVim({
     const [vim, setVim] = useState(null as null | VimWasm);
 
     useEffect(() => {
+        // componentDidMount
         const opts =
             drawer !== undefined
                 ? {
@@ -61,6 +62,31 @@ export function useVim({
         vim.onWriteClipboard = onWriteClipboard;
         vim.onError = onError;
 
+        if (canvas.current !== null) {
+            canvas.current.addEventListener(
+                'dragover',
+                (e: DragEvent) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (e.dataTransfer) {
+                        e.dataTransfer.dropEffect = 'copy';
+                    }
+                },
+                false,
+            );
+            canvas.current.addEventListener(
+                'drop',
+                (e: DragEvent) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    if (e.dataTransfer) {
+                        vim.dropFiles(e.dataTransfer.files).catch(onError);
+                    }
+                },
+                false,
+            );
+        }
+
         if (onVimCreated !== undefined) {
             onVimCreated(vim);
         }
@@ -69,6 +95,7 @@ export function useVim({
         setVim(vim);
 
         return () => {
+            // componentWillUnmount
             if (vim.isRunning()) {
                 vim.cmdline('qall!');
             }
@@ -79,38 +106,7 @@ export function useVim({
         return [null, null, vim];
     }
 
-    const onCanvas = useCallback(
-        (node: HTMLCanvasElement) => {
-            if (vim !== null) {
-                node.addEventListener(
-                    'dragover',
-                    (e: DragEvent) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        if (e.dataTransfer) {
-                            e.dataTransfer.dropEffect = 'copy';
-                        }
-                    },
-                    false,
-                );
-                node.addEventListener(
-                    'drop',
-                    (e: DragEvent) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        if (e.dataTransfer) {
-                            vim.dropFiles(e.dataTransfer.files).catch(onError);
-                        }
-                    },
-                    false,
-                );
-            }
-            canvas.current = node;
-        },
-        [vim],
-    );
-
-    return [onCanvas, input, vim];
+    return [canvas, input, vim];
 }
 
 const INPUT_STYLE = {
