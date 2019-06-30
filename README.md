@@ -109,8 +109,11 @@ $ npm run watch
 # Release build
 $ npm run build
 
-# Check lint
+# Check lint and formatter
 $ npm run lint
+
+# Check lint and formatter with automatic fixes
+$ npm run fix
 ```
 
 ## License

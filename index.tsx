@@ -42,6 +42,12 @@ export function useVim({
 
     useEffect(() => {
         // componentDidMount
+
+        if (vim !== null && vim.isRunning()) {
+            vim.cmdline('qall!');
+        }
+
+        /* eslint-disable @typescript-eslint/no-non-null-assertion */
         const opts =
             drawer !== undefined
                 ? {
@@ -53,14 +59,15 @@ export function useVim({
                       canvas: canvas.current!,
                       input: input.current!,
                   };
-        const vim = new VimWasm(opts);
+        /* eslint-enable @typescript-eslint/no-non-null-assertion */
+        const v = new VimWasm(opts);
 
-        vim.onVimInit = onVimInit;
-        vim.onVimExit = onVimExit;
-        vim.onFileExport = onFileExport;
-        vim.readClipboard = readClipboard;
-        vim.onWriteClipboard = onWriteClipboard;
-        vim.onError = onError;
+        v.onVimInit = onVimInit;
+        v.onVimExit = onVimExit;
+        v.onFileExport = onFileExport;
+        v.readClipboard = readClipboard;
+        v.onWriteClipboard = onWriteClipboard;
+        v.onError = onError;
 
         if (canvas.current !== null) {
             canvas.current.addEventListener(
@@ -80,7 +87,7 @@ export function useVim({
                     e.stopPropagation();
                     e.preventDefault();
                     if (e.dataTransfer) {
-                        vim.dropFiles(e.dataTransfer.files).catch(onError);
+                        v.dropFiles(e.dataTransfer.files).catch(onError);
                     }
                 },
                 false,
@@ -88,19 +95,32 @@ export function useVim({
         }
 
         if (onVimCreated !== undefined) {
-            onVimCreated(vim);
+            onVimCreated(v);
         }
 
-        vim.start({ debug, perf });
-        setVim(vim);
+        v.start({ debug, perf });
+        setVim(v);
 
         return () => {
             // componentWillUnmount
-            if (vim.isRunning()) {
-                vim.cmdline('qall!');
+            if (v.isRunning()) {
+                v.cmdline('qall!');
             }
         };
-    }, []);
+    }, [
+        debug,
+        drawer,
+        onError,
+        onFileExport,
+        onVimCreated,
+        onVimExit,
+        onVimInit,
+        onWriteClipboard,
+        perf,
+        readClipboard,
+        vim,
+        worker,
+    ]);
 
     if (drawer !== undefined) {
         return [null, null, vim];
