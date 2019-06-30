@@ -1,6 +1,6 @@
 {
   "name": "react-vim-wasm",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "React component for vim.wasm",
   "main": "index.js",
   "types": "index.d.ts",
@@ -19,7 +19,7 @@
     "start": "npm-run-all build watch",
     "lint": "prettier --check './*.ts'",
     "fix": "prettier --write './*.ts'",
-    "prepublishOnly": "rm *.js *.js.map *.d.ts && npm run build:tsc -- --declaration",
+    "prepublishOnly": "rm -f *.js *.js.map *.d.ts && npm run build:tsc -- --declaration",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
