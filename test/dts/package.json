@@ -1,0 +1,18 @@
+{
+  "name": "react-vim-wasm-dts-test",
+  "private": true,
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "../../node_modules/.bin/tsc -p ."
+  },
+  "author": "rhysd <lin90162@yahoo.co.jp> (https://rhysd.github.io/)",
+  "license": "MIT",
+  "dependencies": {
+    "react-vim-wasm": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^16.8.22"
+  }
+}
