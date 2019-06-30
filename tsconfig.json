@@ -13,10 +13,11 @@
     "noEmitOnError": true,
     "removeComments": false,
     "strictNullChecks": true,
+    "jsx": "react",
     "sourceMap": true
   },
   "files": [
-    "index.ts",
-    "example.ts"
+    "index.tsx",
+    "example.tsx"
   ]
 }

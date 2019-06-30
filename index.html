@@ -4,9 +4,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes" />
     <title>Example of react-vim-wasm</title>
+    <style>
+      #react-root {
+        display: flex;
+        flex-direction: column;
+      }
+      .vim-screen {
+        margin: 20px 100px;
+        height: 50vh;
+      }
+    </style>
   </head>
   <body>
-    hello
+    <div id="react-root">
+    </div>
     <script src="bundle.js"></script>
   </body>
 </html>
