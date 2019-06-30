@@ -19,6 +19,11 @@ module.exports = {
             jsx: true,
         },
     },
+    settings: {
+        react: {
+            version: 'detect',
+        },
+    },
     rules: {
         // Disabled
         '@typescript-eslint/no-parameter-properties': 'off',
