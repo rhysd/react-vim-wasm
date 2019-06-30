@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { VimWasm, VimWasmConstructOptions, ScreenDrawer } from 'vim-wasm';
+import { VimWasm, ScreenDrawer } from 'vim-wasm';
 
 export interface VimProps {
     worker?: string;
@@ -18,7 +18,7 @@ export interface VimProps {
     autoFocus?: boolean;
 }
 
-export const Vim: React.SFC<VimProps> = ({
+export function useVim({
     worker,
     drawer,
     debug,
@@ -29,15 +29,17 @@ export const Vim: React.SFC<VimProps> = ({
     readClipboard,
     onWriteClipboard,
     onError,
-    className,
-    style,
-}) => {
-    const canvas = useRef(null);
-    const input = useRef(null);
+}: VimProps): [
+    ((node: HTMLCanvasElement | null) => void) | null,
+    React.MutableRefObject<HTMLInputElement | null> | null,
+    VimWasm | null,
+] {
+    const canvas = useRef<HTMLCanvasElement | null>(null);
+    const input = useRef<HTMLInputElement | null>(null);
     const [vim, setVim] = useState(null as null | VimWasm);
 
     useEffect(() => {
-        const opts: VimWasmConstructOptions =
+        const opts =
             drawer !== undefined
                 ? {
                       workerScriptPath: worker,
@@ -68,11 +70,11 @@ export const Vim: React.SFC<VimProps> = ({
     }, []);
 
     if (drawer !== undefined) {
-        return <></>;
+        return [null, null, vim];
     }
 
     const onCanvas = useCallback(
-        node => {
+        (node: HTMLCanvasElement) => {
             if (vim !== null) {
                 node.addEventListener(
                     'dragover',
@@ -91,7 +93,7 @@ export const Vim: React.SFC<VimProps> = ({
                         e.stopPropagation();
                         e.preventDefault();
                         if (e.dataTransfer) {
-                            vim.dropFiles(e.dataTransfer.files).catch(console.error);
+                            vim.dropFiles(e.dataTransfer.files).catch(onError);
                         }
                     },
                     false,
@@ -102,22 +104,32 @@ export const Vim: React.SFC<VimProps> = ({
         [vim],
     );
 
-    const inputStyle = {
-        width: '1px',
-        color: 'transparent',
-        backgroundColor: 'transparent',
-        padding: '0px',
-        border: '0px',
-        outline: 'none',
-        position: 'relative',
-        top: '0px',
-        left: '0px',
-    } as const;
+    return [onCanvas, input, vim];
+}
+
+const INPUT_STYLE = {
+    width: '1px',
+    color: 'transparent',
+    backgroundColor: 'transparent',
+    padding: '0px',
+    border: '0px',
+    outline: 'none',
+    position: 'relative',
+    top: '0px',
+    left: '0px',
+} as const;
+
+export const Vim: React.SFC<VimProps> = props => {
+    const [canvasRef, inputRef] = useVim(props);
+    if (canvasRef === null || inputRef === null) {
+        // This component has no responsibility to render screen and handle inputs.
+        return <></>;
+    }
 
     return (
         <>
-            <canvas ref={onCanvas} style={style} className={className} />
-            <input ref={input} style={inputStyle} autoComplete="off" autoFocus />
+            <canvas ref={canvasRef} style={props.style} className={props.className} />
+            <input ref={inputRef} style={INPUT_STYLE} autoComplete="off" autoFocus />
         </>
     );
 };
