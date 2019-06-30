@@ -90,6 +90,22 @@ resize event also must be handled using `VimWasm.resize()` method.
 For a real example, please read [`DummyDrawer` class](https://github.com/rhysd/vim.wasm/blob/wasm/wasm/test/helper.ts)
 which is used for testing draw events.
 
+## Development
+
+Some scripts are defined in `package.json`.
+
+```sh
+# Start TypeScript compiler and parcel bundler with watch mode.
+# Example site is hosted at http://localhost:1234 and enables hot-reload.
+$ npm run watch
+
+# Release build
+$ npm run build
+
+# Check lint
+$ npm run lint
+```
+
 ## License
 
 This repository is licensed under [MIT License](./LICENSE.txt).
