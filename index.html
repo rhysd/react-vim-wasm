@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes" />
+    <link rel="stylesheet" href="./node_modules/bulma/css/bulma.min.css" />
+    <link rel="stylesheet" href="./node_modules/github-fork-ribbon-css/gh-fork-ribbon.css" />
+    <title>Example of react-vim-wasm</title>
+    <style>
+      html {
+        background-color: #eee;
+      }
+      body {
+        margin: 16px;
+      }
+      #react-root {
+        display: flex;
+        flex-direction: column;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .vim-screen {
+        margin: 20px 0;
+        height: 50vh;
+        border: 2px solid #aaa;
+      }
+      .horizontal {
+        display: flex;
+        flex-direction: row;
+        margin: 4px auto;
+        align-items: center;
+        max-width: 640px;
+      }
+      .horizontal > * {
+        margin: 0 4px;
+      }
+      .colon {
+        font-size: 2rem;
+      }
+      .footer {
+        background-color: #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="github-fork-ribbon" href="https://github.com/rhysd/react-vim-wasm" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+    <h1 class="title">Example of <a href="https://github.com/rhysd/react-vim-wasm" rel="noopener">react-vim-wasm</a></h1>
+    <h2 class="subtitle">Embed Vim editor as React component</h2>
+    <div id="react-root" class="content"></div>
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          <strong>react-vim-wasm</strong> by <a href="https://rhysd.github.io">@rhysd</a>. The source code is licensed
+          <a href="http://opensource.org/licenses/mit-license.php">MIT</a>.
+        </p>
+      </div>
+    </footer>
+    <script src="bundle.js"></script>
+  </body>
+</html>

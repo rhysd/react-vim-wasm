@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "module": "esNext",
+    "moduleResolution": "node",
+    "target": "ES2017",
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "strictNullChecks": true,
+    "jsx": "react",
+    "sourceMap": true
+  },
+  "files": [
+    "index.tsx",
+    "example.tsx"
+  ]
+}

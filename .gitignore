@@ -1,0 +1,14 @@
+/.cache
+/node_modules/*
+!/node_modules/bulma
+!/node_modules/github-fork-ribbon-css
+!/node_modules/vim-wasm
+/*.ts
+/*.tsx
+/*.js.map
+/*.d.ts
+/index.js
+/example.js
+/package-lock.json
+/package.json
+/tsconfig.json
