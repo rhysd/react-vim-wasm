@@ -47,7 +47,7 @@ Vim instance management logic can be integrated into your component easily.
 
 ```javascript
 import * as React from 'react';
-import { Vim } from 'react-vim-wasm';
+import { useVim } from 'react-vim-wasm';
 
 const YourComponent = props => {
     const [canvasRef, inputRef, vim] = useVim({
