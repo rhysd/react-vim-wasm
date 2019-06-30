@@ -1,5 +1,6 @@
 React component for vim.wasm
 ============================
+[![npm version](https://badge.fury.io/js/react-vim-wasm.svg)][npm]
 
 [`react-vim-wasm` npm package][npm] provides [React](https://github.com/facebook/react) component for
 [vim.wasm](https://github.com/rhysd/vim.wasm). Vim editor can be easily embedded into your React
@@ -56,6 +57,7 @@ const YourComponent = props => {
 
     // Access to `vim` instance if you want
 
+    // Set refs to render screen and handle key inputs
     return <>
         <canvas ref={canvasRef} />
         <input ref={inputRef} />
@@ -89,6 +91,11 @@ resize event also must be handled using `VimWasm.resize()` method.
 
 For a real example, please read [`DummyDrawer` class](https://github.com/rhysd/vim.wasm/blob/wasm/wasm/test/helper.ts)
 which is used for testing draw events.
+
+### TypeScript Support
+
+This package provides complete [TypeScript](https://www.typescriptlang.org) support.
+Please read `index.d.ts` type definitions file put in installed pacakge directory.
 
 ## Development
 
