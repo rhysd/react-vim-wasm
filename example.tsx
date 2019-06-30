@@ -21,9 +21,12 @@ const Commandline: React.SFC<{ vim: VimWasm | null }> = ({ vim }) => {
     }, [vim]);
 
     return (
-        <div className="control">
-            :<input ref={input} className="cmdline" />
-            <button onClick={onClick}>Run Command</button>
+        <div className="horizontal">
+            <div className="colon">:</div>
+            <input ref={input} className="input text" type="text" placeholder="Vim command" />
+            <button className="button is-link" onClick={onClick}>
+                Run
+            </button>
         </div>
     );
 };
@@ -36,8 +39,30 @@ const DownloadBuffer: React.SFC<{ vim: VimWasm | null }> = ({ vim }) => {
     }, [vim]);
 
     return (
-        <div className="control">
-            <button onClick={onClick}>Download Buffer as File</button>
+        <div className="horizontal">
+            <button className="button is-link" onClick={onClick}>
+                Download Buffer as File
+            </button>
+        </div>
+    );
+};
+
+const Control: React.SFC<{ vim: VimWasm | null }> = ({ vim }) => {
+    return (
+        <div className="box">
+            <h3 className="title is-3">Controls</h3>
+            <div className="field">
+                <label className="label">Vim command</label>
+                <div className="control">
+                    <Commandline vim={vim} />
+                </div>
+            </div>
+            <div className="field">
+                <label className="label">File Access</label>
+                <div className="control">
+                    <DownloadBuffer vim={vim} />
+                </div>
+            </div>
         </div>
     );
 };
@@ -60,8 +85,7 @@ const VimWasmExample: React.SFC = () => {
                 onError={e => alert(`Error! ${e.message}`)}
                 onVimCreated={onVim}
             />
-            <Commandline vim={vim} />
-            <DownloadBuffer vim={vim} />
+            <Control vim={vim} />
         </>
     );
 };
