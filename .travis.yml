@@ -1,0 +1,18 @@
+language: node_js
+node_js: stable
+
+dist: xenial
+
+before_script:
+  - npm install
+  - cd test/dts/ && npm install && cd -
+
+script:
+  - npm run build
+  - npm run lint
+  - npm test
+
+cache:
+  npm: true
+
+# vim:set sts=2 sw=2 tw=0 et:
