@@ -1,6 +1,7 @@
 React component for vim.wasm
 ============================
 [![npm version](https://badge.fury.io/js/react-vim-wasm.svg)][npm]
+[![Build Status](https://travis-ci.org/rhysd/react-vim-wasm.svg?branch=master)](https://travis-ci.org/rhysd/react-vim-wasm)
 
 [`react-vim-wasm` npm package][npm] provides [React](https://github.com/facebook/react) component for
 [vim.wasm](https://github.com/rhysd/vim.wasm). Vim editor can be easily embedded into your React
