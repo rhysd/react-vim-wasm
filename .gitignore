@@ -1,8 +1,5 @@
 /.cache
-/node_modules/*
-!/node_modules/bulma
-!/node_modules/github-fork-ribbon-css
-!/node_modules/vim-wasm
+/node_modules
 /*.ts
 /*.tsx
 /*.js.map
