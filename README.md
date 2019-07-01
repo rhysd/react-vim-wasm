@@ -100,6 +100,23 @@ in your component. This value is set to `null` if `drawer` property is set.
 The third element is a `VimWasm` instance. Some operations (such as `.cmdline()` method) can be done
 via this instance. Please read [vim.wasm document](https://github.com/rhysd/vim.wasm/tree/wasm/wasm#readme) for more details.
 
+### `checkVimWasmIsAvailable()` utility
+
+[vim.wasm](https://github.com/rhysd/vim.wasm) requires `Worker`, `SharedArrayBuffer` and `Atomics`
+and some browsers don't meet the requirements.
+
+This package provides `checkVimWasmIsAvailable` utility function to check browser compatibility.
+It returns an error message as `string` when the current browser is incompatible, otherwise `undefined`.
+
+```js
+import { checkVimWasmIsAvailable } from 'react-vim-wasm';
+
+const errmsg = checkVimWasmIsAvailable();
+if (errmsg) {
+    alert(errmsg);
+}
+```
+
 ### Custom Screen Drawer
 
 User-defined custom renderer can be defined through `drawer` property of `<Vim/>` component or
