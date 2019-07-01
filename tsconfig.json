@@ -18,6 +18,6 @@
   },
   "files": [
     "index.tsx",
-    "example.tsx"
+    "example/index.tsx"
   ]
 }

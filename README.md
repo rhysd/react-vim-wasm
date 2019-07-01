@@ -44,7 +44,7 @@ const onError = useCallback(e => alert(`Error! ${e.message}`), []);
 By using this component, all setup is done in the component lifecycle; Prepare `<canvas/>` and `<input/>`,
 load and start Vim editor instance in Web Worker, clean up the worker on Vim ends.
 
-For real example, please read [example code](./example.tsx).
+For real example, please read [example code](./example).
 
 Properties of `<Vim/>` are as follows:
 

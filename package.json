@@ -11,14 +11,14 @@
   ],
   "scripts": {
     "build:tsc": "tsc -p .",
-    "build:parcel": "parcel build -d . -o bundle.js ./example.js",
+    "build:parcel": "parcel build -d example -o bundle.js ./example/index.js",
     "build": "npm-run-all build:tsc build:parcel",
     "watch:tsc": "tsc --watch -p .",
-    "watch:parcel": "parcel serve -p 1234 -d . -o bundle.js ./example.js",
+    "watch:parcel": "parcel serve -p 1234 -d example -o bundle.js ./example/index.js",
     "watch": "npm-run-all -p watch:tsc watch:parcel",
     "start": "npm-run-all build watch",
-    "lint": "eslint '*.tsx'",
-    "fix": "eslint --fix '*.tsx'",
+    "lint": "eslint '*.tsx' 'example/*.tsx'",
+    "fix": "eslint --fix '*.tsx' 'example/*.tsx'",
     "prepublishOnly": "rm -f *.js *.js.map *.d.ts && npm run build:tsc -- --declaration",
     "test": "cd test/dts/ && npm test"
   },

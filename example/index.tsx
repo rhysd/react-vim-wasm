@@ -3,7 +3,7 @@ import { useRef, useState, useCallback } from 'react';
 import { render } from 'react-dom';
 import { saveAs } from 'file-saver';
 import { VimWasm } from 'vim-wasm';
-import { Vim, checkVimWasmIsAvailable } from '.';
+import { Vim, checkVimWasmIsAvailable } from '..';
 
 function downloadFile(fullpath: string, contents: ArrayBuffer) {
     const slashIdx = fullpath.lastIndexOf('/');
@@ -89,7 +89,7 @@ const VimWasmExample: React.SFC = () => {
     return (
         <>
             <Vim
-                worker="./node_modules/vim-wasm/vim.js"
+                worker="./static/vim-wasm/vim.js"
                 className="vim-screen"
                 onVimExit={onVimExit}
                 onFileExport={downloadFile}
