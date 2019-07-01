@@ -3,12 +3,17 @@ import { useState, useEffect, useRef } from 'react';
 import { VimWasm, ScreenDrawer } from 'vim-wasm';
 
 export function checkVimWasmIsAvailable(): string | undefined {
+    function notSupported(feat: string): string {
+        return `${feat} is not supported by this browser. If you're using Firefox or Safari, please enable feature flag.`;
+    }
+
     if (typeof SharedArrayBuffer === 'undefined') {
-        return "SharedArrayBuffer is not supported by this browser. If you're using Firefox or Safari, please enable feature flag.";
+        return notSupported('SharedArrayBuffer');
     }
     if (typeof Atomics === 'undefined') {
-        return "Atomics API is not supported by this browser. If you're using Firefox or Safari, please enable feature flag.";
+        return notSupported('Atomics API');
     }
+
     return undefined;
 }
 
@@ -139,17 +144,19 @@ const INPUT_STYLE = {
 export const Vim: React.SFC<VimProps> = props => {
     const [canvasRef, inputRef, vim] = useVim(props);
     if (canvasRef === null || inputRef === null) {
-        // This component has no responsibility to render screen and handle inputs.
-        return <></>;
+        // When drawer prop is set, it has responsibility to render screen.
+        // This component does not render screen and handle inputs.
+        return null;
     }
 
-    const { style, className, onVimExit, onVimInit, onFileExport, onWriteClipboard, onError } = props;
+    const { style, className, onVimExit, onVimInit, onFileExport, onWriteClipboard, onError, readClipboard } = props;
     if (vim !== null) {
         vim.onVimExit = onVimExit;
         vim.onVimInit = onVimInit;
         vim.onFileExport = onFileExport;
         vim.onWriteClipboard = onWriteClipboard;
         vim.onError = onError;
+        vim.readClipboard = readClipboard;
     }
 
     return (
