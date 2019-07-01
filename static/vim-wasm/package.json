@@ -1,0 +1,146 @@
+{
+  "_args": [
+    [
+      "vim-wasm@0.0.4",
+      "/Users/npsdev5/Develop/github.com/rhysd/react-vim-wasm"
+    ]
+  ],
+  "_from": "vim-wasm@0.0.4",
+  "_id": "vim-wasm@0.0.4",
+  "_inBundle": false,
+  "_integrity": "sha512-hlRClN539JcVz4uoUTdrZu+nM5AQIiBcROQNFL5RM6Chciz12YQJIpeZ2h6LGEfKJHP0TWRvel/KWu/p/0okCw==",
+  "_location": "/vim-wasm",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "version",
+    "registry": true,
+    "raw": "vim-wasm@0.0.4",
+    "name": "vim-wasm",
+    "escapedName": "vim-wasm",
+    "rawSpec": "0.0.4",
+    "saveSpec": null,
+    "fetchSpec": "0.0.4"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/vim-wasm/-/vim-wasm-0.0.4.tgz",
+  "_spec": "0.0.4",
+  "_where": "/Users/npsdev5/Develop/github.com/rhysd/react-vim-wasm",
+  "author": {
+    "name": "rhysd",
+    "email": "lin90162@yahoo.co.jp",
+    "url": "https://rhysd.github.io/"
+  },
+  "bugs": {
+    "url": "https://github.com/rhysd/vim.wasm/issues"
+  },
+  "description": "Vim editor ported to WebAssembly",
+  "devDependencies": {
+    "@types/chai": "^4.1.7",
+    "@types/mocha": "^5.2.7",
+    "@types/sinon": "^7.0.13",
+    "@typescript-eslint/eslint-plugin": "^1.10.2",
+    "@typescript-eslint/parser": "^1.10.2",
+    "chai": "^4.2.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-mocha": "^5.3.0",
+    "eslint-plugin-security": "^1.4.0",
+    "karma": "^4.1.0",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-mocha": "^1.3.0",
+    "karma-sinon": "^1.0.5",
+    "mocha": "^6.1.4",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.18.2",
+    "puppeteer": "^1.18.0",
+    "sinon": "^7.3.2",
+    "stylelint": "^10.1.0",
+    "stylelint-config-recommended": "^2.2.0",
+    "typescript": "^3.5.2",
+    "uglify-es": "^3.3.9"
+  },
+  "eslintConfig": {
+    "extends": "eslint:recommended",
+    "env": {
+      "browser": true,
+      "node": false
+    },
+    "globals": {
+      "debug": true,
+      "VW": true,
+      "Module": true,
+      "UTF8ToString": true,
+      "autoAddDeps": true,
+      "mergeInto": true,
+      "LibraryManager": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2015
+    },
+    "rules": {
+      "no-unused-vars": [
+        "error",
+        {
+          "argsIgnorePattern": "^_$"
+        }
+      ]
+    }
+  },
+  "files": [
+    "vim.wasm",
+    "vim.data",
+    "vim.js",
+    "vimwasm.js",
+    "vimwasm.js.map",
+    "vimwasm.ts",
+    "vimwasm.d.ts",
+    "common_types.ts",
+    "common_types.d.ts",
+    "pre.js",
+    "pre.js.map",
+    "pre.ts",
+    "runtime.js",
+    "runtime.js.map",
+    "runtime.ts"
+  ],
+  "homepage": "https://github.com/rhysd/vim.wasm#readme",
+  "keywords": [
+    "Vim",
+    "editor",
+    "WebAssembly"
+  ],
+  "license": "Vim",
+  "main": "vimwasm.js",
+  "name": "vim-wasm",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhysd/vim.wasm.git"
+  },
+  "scripts": {
+    "build": "npm-run-all -p build:main build:worker",
+    "build:main": "tsc -d -p tsconfig.main.json",
+    "build:worker": "tsc -p tsconfig.worker.json",
+    "eslint": "eslint '*.ts' 'test/*.ts'",
+    "fix": "npm-run-all -p fix:prettier fix:eslint",
+    "fix:eslint": "eslint --fix '*.ts' 'test/*.ts'",
+    "fix:prettier": "prettier --write --ignore-path .gitignore '*.ts'",
+    "karma": "karma start",
+    "lint": "npm-run-all -p stylelint eslint prettier",
+    "minify": "uglifyjs --output vim.js vim.js && uglifyjs --output main.js main.js && uglifyjs --output vimwasm.js vimwasm.js",
+    "prettier": "prettier --check --ignore-path .gitignore '*.ts'",
+    "stylelint": "stylelint style.css",
+    "test": "karma start --single-run",
+    "watch": "npm-run-all -p watch:main watch:worker",
+    "watch:main": "tsc -p tsconfig.main.json --watch",
+    "watch:worker": "tsc -p tsconfig.worker.json --watch"
+  },
+  "stylelint": {
+    "extends": "stylelint-config-recommended"
+  },
+  "type": "module",
+  "types": "./vimwasm.d.ts",
+  "version": "0.0.4"
+}
