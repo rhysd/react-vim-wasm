@@ -15,7 +15,6 @@ export interface VimProps {
     onError?: (err: Error) => void;
     className?: string;
     style?: React.CSSProperties;
-    autoFocus?: boolean;
     onVimCreated?: (vim: VimWasm) => void;
 }
 

@@ -20,7 +20,7 @@ npm install --save react react-vim-wasm
 
 ## Usage
 
-### `<Vim/>` componet.
+### `<Vim/>` component
 
 ```javascript
 import * as React from 'react';
@@ -40,6 +40,24 @@ By using this component, all setup is done in the component lifecycle; Prepare `
 load and start Vim editor instance in Web Worker, clean up the worker on Vim ends.
 
 For real example, please read [example code](./example.tsx).
+
+Properties of `<Vim/>` are as follows:
+
+| Property Name      | Description                                                    | Type                            | Default Value |
+|--------------------|----------------------------------------------------------------|---------------------------------|---------------|
+| `worker`           | File path to worker script `vim.js` in `vim-wasm` package.     | `string`                        | `vim.js`      |
+| `className`        | Class name added to underlying `<canvas/>` DOM element.        | `string`                        | `undefined`   |
+| `style`            | `style` attribute value of underlying `<canvas/>` dom element. | `Object`                        | `undefined`   |
+| `debug`            | Enable JavaScript debug logging to console.                    | `boolean`                       | `false`       |
+| `perf`             | Enable performance tracing and dump result at Vim exiting.     | `boolean`                       | `false`       |
+| `onVimCreated`     | Callback called at creating a `VimWasm` instance.              | `(VimWasm) => void`             | `undefined`   |
+| `onError`          | Callback called when an error is thrown in worker.             | `(Error) => void`               | `undefined`   |
+| `onVimInit`        | Callback called at initializing Vim worker instance.           | `() => void`                    | `undefined`   |
+| `onVimExit`        | Callback called at Vim exiting.                                | `(number) => void`              | `undefined`   |
+| `onFileExport`     | Callback when `:export` is run.                                | `(string, ArrayBuffer) => void` | `undefined`   |
+| `readClipboard`    | Async function to read a clipboard text.                       | `async () => string`            | `undefined`   |
+| `onWriteClipboard` | Async function to write a clipboard text.                      | `async (string) => void`        | `undefined`   |
+| `drawer`           | User-defined screen drawer instance (see below section).       | `ScreenDrawer`                  | `undefined`   |
 
 ### `useVim()` hook
 
@@ -82,7 +100,7 @@ via this instance. Please read [vim.wasm document](https://github.com/rhysd/vim.
 User-defined custom renderer can be defined through `drawer` property of `<Vim/>` component or
 `useVim()` hook.
 
-The `drawer` proprety is an instance which implements `ScreenDrawer` interface defined in `vim-wasm/vimwasm.d.ts`.
+The `drawer` property is an instance which implements `ScreenDrawer` interface defined in `vim-wasm/vimwasm.d.ts`.
 Please read [this code](https://github.com/rhysd/vim.wasm/blob/wasm/wasm/vimwasm.ts) to know the interface.
 
 By defining your class implementing the interface, your class can render Vim screen instead of `<canvas/>`.
@@ -96,7 +114,7 @@ which is used for testing draw events.
 ### TypeScript Support
 
 This package provides complete [TypeScript](https://www.typescriptlang.org) support.
-Please read `index.d.ts` type definitions file put in installed pacakge directory.
+Please read `index.d.ts` type definitions file put in installed package directory.
 
 ## Development
 
