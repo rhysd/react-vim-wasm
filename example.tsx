@@ -3,7 +3,7 @@ import { useRef, useState, useCallback } from 'react';
 import { render } from 'react-dom';
 import { saveAs } from 'file-saver';
 import { VimWasm } from 'vim-wasm';
-import { Vim } from '.';
+import { Vim, checkVimWasmIsAvailable } from '.';
 
 function downloadFile(fullpath: string, contents: ArrayBuffer) {
     const slashIdx = fullpath.lastIndexOf('/');
@@ -67,22 +67,35 @@ const Control: React.SFC<{ vim: VimWasm | null }> = ({ vim }) => {
     );
 };
 
+const VIM_WASM_AVAILABLITY_MESSAGE = checkVimWasmIsAvailable();
+
 const VimWasmExample: React.SFC = () => {
     const [vim, setVim] = useState<VimWasm | null>(null);
     const onVim = useCallback(v => {
         setVim(v);
     }, []);
+    const onError = useCallback((e: Error) => {
+        alert(`Error! ${e.message}`);
+    }, []);
+    const onVimExit = useCallback((status: number) => {
+        alert(`Vim exited with status ${status}`);
+    }, []);
+
+    if (VIM_WASM_AVAILABLITY_MESSAGE !== undefined) {
+        const style = { color: 'red', fontWeight: 'bold' } as const;
+        return <div style={style}>{VIM_WASM_AVAILABLITY_MESSAGE}</div>;
+    }
 
     return (
         <>
             <Vim
                 worker="./node_modules/vim-wasm/vim.js"
                 className="vim-screen"
-                onVimExit={s => alert(`Vim exited with status ${s}`)}
+                onVimExit={onVimExit}
                 onFileExport={downloadFile}
                 readClipboard={navigator.clipboard && navigator.clipboard.readText}
                 onWriteClipboard={navigator.clipboard && navigator.clipboard.writeText}
-                onError={e => alert(`Error! ${e.message}`)}
+                onError={onError}
                 onVimCreated={onVim}
             />
             <Control vim={vim} />

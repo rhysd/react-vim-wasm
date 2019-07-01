@@ -13,6 +13,10 @@ module.exports = {
         es6: true,
         browser: true,
     },
+    globals: {
+        SharedArrayBuffer: 'readonly',
+        Atomics: 'readonly',
+    },
     parser: '@typescript-eslint/parser',
     plugins: ['@typescript-eslint', 'security', 'react', 'react-hooks', 'prettier'],
     parserOptions: {

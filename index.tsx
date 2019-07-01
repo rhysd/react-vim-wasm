@@ -2,6 +2,16 @@ import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { VimWasm, ScreenDrawer } from 'vim-wasm';
 
+export function checkVimWasmIsAvailable(): string | undefined {
+    if (typeof SharedArrayBuffer === 'undefined') {
+        return "SharedArrayBuffer is not supported by this browser. If you're using Firefox or Safari, please enable feature flag.";
+    }
+    if (typeof Atomics === 'undefined') {
+        return "Atomics API is not supported by this browser. If you're using Firefox or Safari, please enable feature flag.";
+    }
+    return undefined;
+}
+
 export interface VimProps {
     worker?: string;
     drawer?: ScreenDrawer;
@@ -41,10 +51,6 @@ export function useVim({
 
     useEffect(() => {
         // componentDidMount
-
-        if (vim !== null && vim.isRunning()) {
-            vim.cmdline('qall!');
-        }
 
         /* eslint-disable @typescript-eslint/no-non-null-assertion */
         const opts =
@@ -106,20 +112,10 @@ export function useVim({
                 v.cmdline('qall!');
             }
         };
-    }, [
-        debug,
-        drawer,
-        onError,
-        onFileExport,
-        onVimCreated,
-        onVimExit,
-        onVimInit,
-        onWriteClipboard,
-        perf,
-        readClipboard,
-        vim,
-        worker,
-    ]);
+        /* eslint-disable react-hooks/exhaustive-deps */
+    }, [worker, debug, perf]);
+    // Note: Vim worker should be started once at componentDidMount
+    /* eslint-enable react-hooks/exhaustive-deps */
 
     if (drawer !== undefined) {
         return [null, null, vim];
@@ -141,15 +137,24 @@ const INPUT_STYLE = {
 } as const;
 
 export const Vim: React.SFC<VimProps> = props => {
-    const [canvasRef, inputRef] = useVim(props);
+    const [canvasRef, inputRef, vim] = useVim(props);
     if (canvasRef === null || inputRef === null) {
         // This component has no responsibility to render screen and handle inputs.
         return <></>;
     }
 
+    const { style, className, onVimExit, onVimInit, onFileExport, onWriteClipboard, onError } = props;
+    if (vim !== null) {
+        vim.onVimExit = onVimExit;
+        vim.onVimInit = onVimInit;
+        vim.onFileExport = onFileExport;
+        vim.onWriteClipboard = onWriteClipboard;
+        vim.onError = onError;
+    }
+
     return (
         <>
-            <canvas ref={canvasRef} style={props.style} className={props.className} />
+            <canvas ref={canvasRef} style={style} className={className} />
             <input ref={inputRef} style={INPUT_STYLE} autoComplete="off" autoFocus />
         </>
     );

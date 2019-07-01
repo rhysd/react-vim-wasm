@@ -43,21 +43,21 @@ For real example, please read [example code](./example.tsx).
 
 Properties of `<Vim/>` are as follows:
 
-| Property Name      | Description                                                    | Type                            | Default Value |
-|--------------------|----------------------------------------------------------------|---------------------------------|---------------|
-| `worker`           | File path to worker script `vim.js` in `vim-wasm` package.     | `string`                        | `vim.js`      |
-| `className`        | Class name added to underlying `<canvas/>` DOM element.        | `string`                        | `undefined`   |
-| `style`            | `style` attribute value of underlying `<canvas/>` dom element. | `Object`                        | `undefined`   |
-| `debug`            | Enable JavaScript debug logging to console.                    | `boolean`                       | `false`       |
-| `perf`             | Enable performance tracing and dump result at Vim exiting.     | `boolean`                       | `false`       |
-| `onVimCreated`     | Callback called at creating a `VimWasm` instance.              | `(VimWasm) => void`             | `undefined`   |
-| `onError`          | Callback called when an error is thrown in worker.             | `(Error) => void`               | `undefined`   |
-| `onVimInit`        | Callback called at initializing Vim worker instance.           | `() => void`                    | `undefined`   |
-| `onVimExit`        | Callback called at Vim exiting.                                | `(number) => void`              | `undefined`   |
-| `onFileExport`     | Callback when `:export` is run.                                | `(string, ArrayBuffer) => void` | `undefined`   |
-| `readClipboard`    | Async function to read a clipboard text.                       | `async () => string`            | `undefined`   |
-| `onWriteClipboard` | Async function to write a clipboard text.                      | `async (string) => void`        | `undefined`   |
-| `drawer`           | User-defined screen drawer instance (see below section).       | `ScreenDrawer`                  | `undefined`   |
+| Property Name      | Description                                                       | Type                            | Default Value |
+|--------------------|-------------------------------------------------------------------|---------------------------------|---------------|
+| `worker`           | File path to worker script `vim.js` in `vim-wasm` package.        | `string`                        | `vim.js`      |
+| `className`        | Class name added to underlying `<canvas/>` DOM element.           | `string`                        | `undefined`   |
+| `style`            | `style` attribute value of underlying `<canvas/>` dom element.    | `Object`                        | `undefined`   |
+| `debug`            | Enable JavaScript debug logging to console.                       | `boolean`                       | `false`       |
+| `perf`             | Enable performance tracing and dump result at Vim exiting.        | `boolean`                       | `false`       |
+| `onVimCreated`     | Callback called at creating a `VimWasm` instance.                 | `(VimWasm) => void`             | `undefined`   |
+| `onError`          | Callback called when an error is thrown in worker.                | `(Error) => void`               | `undefined`   |
+| `onVimInit`        | Callback called at initializing Vim worker instance.              | `() => void`                    | `undefined`   |
+| `onVimExit`        | Callback called at Vim exiting.                                   | `(number) => void`              | `undefined`   |
+| `onFileExport`     | Callback when `:export` is run.                                   | `(string, ArrayBuffer) => void` | `undefined`   |
+| `readClipboard`    | Async function to read a clipboard text.                          | `async () => string`            | `undefined`   |
+| `onWriteClipboard` | Async function to write a clipboard text.                         | `async (string) => void`        | `undefined`   |
+| `drawer`           | User-defined screen drawer instance (see below section).          | `ScreenDrawer`                  | `undefined`   |
 
 ### `useVim()` hook
 
