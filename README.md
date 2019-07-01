@@ -138,6 +138,9 @@ $ npm run lint
 
 # Check lint and formatter with automatic fixes
 $ npm run fix
+
+# Deploy to gh-pages
+$ npm run gh-pages
 ```
 
 ## License

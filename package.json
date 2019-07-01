@@ -19,6 +19,7 @@
     "start": "npm-run-all build watch",
     "lint": "eslint '*.tsx' 'example/*.tsx'",
     "fix": "eslint --fix '*.tsx' 'example/*.tsx'",
+    "gh-pages": "./scripts/deploy.sh",
     "prepublishOnly": "rm -f *.js *.js.map *.d.ts && npm run build:tsc -- --declaration",
     "test": "cd test/dts/ && npm test"
   },
