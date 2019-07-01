@@ -24,15 +24,20 @@ npm install --save react react-vim-wasm
 
 ```javascript
 import * as React from 'react';
+import { useCallback } from 'react';
 import { Vim } from 'react-vim-wasm';
+
+const onVimExit = useCallback(s => alert(`Vim exited with status ${s}`), []);
+const onFileExport = useCallback((f, buf) => console.log('file exported:', f, buf), []);
+const onError = useCallback(e => alert(`Error! ${e.message}`), []);
 
 <Vim
     worker="/path/to/vim-wasm/vim.js"
-    onVimExit={s => alert(`Vim exited with status ${s}`)}
-    onFileExport={(f, buf) => console.log('file exported:', f, buf)}
+    onVimExit={onVimExit}
+    onFileExport={onFileExport}
     readClipboard={navigator.clipboard && navigator.clipboard.readText}
     onWriteClipboard={navigator.clipboard && navigator.clipboard.writeText}
-    onError={e => alert(`Error! ${e.message}`)}
+    onError={onError}
 />
 ```
 
