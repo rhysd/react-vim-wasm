@@ -22,6 +22,7 @@ export interface VimProps {
     drawer?: ScreenDrawer;
     debug?: boolean;
     perf?: boolean;
+    clipboard?: boolean;
     onVimExit?: (status: number) => void;
     onVimInit?: () => void;
     onFileExport?: (fullpath: string, contents: ArrayBuffer) => void;
@@ -38,6 +39,7 @@ export function useVim({
     drawer,
     debug,
     perf,
+    clipboard,
     onVimExit,
     onVimInit,
     onFileExport,
@@ -108,7 +110,7 @@ export function useVim({
             onVimCreated(v);
         }
 
-        v.start({ debug, perf });
+        v.start({ debug, perf, clipboard });
         setVim(v);
 
         return () => {
@@ -118,10 +120,10 @@ export function useVim({
             }
         };
         /* eslint-disable react-hooks/exhaustive-deps */
-    }, [worker, debug, perf]);
+    }, [worker, debug, perf, clipboard]);
     // Note: Vim worker should be started once at componentDidMount
-    // `worker`, `debug` and `perf` are startup configuration. So when they are changed,
-    // New Vim instance must be created with the new configuration.
+    // `worker`, `debug`, `perf` and `clipboard` are startup configuration. So when they are changed,
+    // new Vim instance must be created with the new configuration.
     /* eslint-enable react-hooks/exhaustive-deps */
 
     if (drawer !== undefined) {
