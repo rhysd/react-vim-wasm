@@ -4,3 +4,4 @@
 *.js.map
 *.d.ts
 !/.eslintrc.js
+!/karma.conf.js

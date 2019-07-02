@@ -11,6 +11,7 @@ script:
   - npm run build
   - npm run lint
   - npm test
+  - npm dts-test
 
 cache:
   npm: true
