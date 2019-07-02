@@ -43,12 +43,17 @@ describe('react-vim-wasm', function() {
             reactRoot,
         );
 
-        // Wait for
+        // Note: I didn't use async/await because babel (run by parcel) transpiles async/await
+        // and babel runtime is necessary to run the transpiled code.
+        // To avoid unnecessary complexity by transpiling async/await, here only Promise is used.
+
+        // Wait for Vim rendering first screen
         return wait(1000)
             .then(() => {
                 ok(vim, 'Vim did not start');
                 ok(onVimInit.called, 'onVimInit was not called');
                 vim!.cmdline('qall!');
+                // Wait for Vim shutting down
                 return wait(500);
             })
             .then(() => {

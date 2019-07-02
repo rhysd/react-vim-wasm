@@ -26,6 +26,7 @@ cp -R ./node_modules/vim-wasm ./static/
 
 git add bundle.js index.html static
 git commit -m "Imported from ${hash}"
-git show HEAD
+git show --stat HEAD
 
-echo 'Check the latest commit and push it to remote if it looks ok'
+echo 'Host this directory with web server and check the page is correct manually.'
+echo "If it's ok, push the latest commit to remote."
