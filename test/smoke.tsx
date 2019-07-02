@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { ok } from 'assert';
 import * as sinon from 'sinon';
 import * as React from 'react';
