@@ -1,6 +1,6 @@
 {
   "name": "react-vim-wasm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "React component for vim.wasm",
   "main": "index.js",
   "types": "index.d.ts",
