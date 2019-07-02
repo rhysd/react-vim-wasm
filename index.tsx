@@ -120,6 +120,8 @@ export function useVim({
         /* eslint-disable react-hooks/exhaustive-deps */
     }, [worker, debug, perf]);
     // Note: Vim worker should be started once at componentDidMount
+    // `worker`, `debug` and `perf` are startup configuration. So when they are changed,
+    // New Vim instance must be created with the new configuration.
     /* eslint-enable react-hooks/exhaustive-deps */
 
     if (drawer !== undefined) {

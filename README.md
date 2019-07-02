@@ -50,7 +50,7 @@ Properties of `<Vim/>` are as follows:
 
 | Property Name      | Description                                                       | Type                            | Default Value |
 |--------------------|-------------------------------------------------------------------|---------------------------------|---------------|
-| `worker`           | File path to worker script `vim.js` in `vim-wasm` package.        | `string`                        | `vim.js`      |
+| `worker`           | File path to worker script `vim.js` in `vim-wasm` package.        | `string`                        | `"vim.js"`    |
 | `className`        | Class name added to underlying `<canvas/>` DOM element.           | `string`                        | `undefined`   |
 | `style`            | `style` attribute value of underlying `<canvas/>` dom element.    | `Object`                        | `undefined`   |
 | `debug`            | Enable JavaScript debug logging to console.                       | `boolean`                       | `false`       |
@@ -63,6 +63,8 @@ Properties of `<Vim/>` are as follows:
 | `readClipboard`    | Async function to read a clipboard text.                          | `async () => string`            | `undefined`   |
 | `onWriteClipboard` | Async function to write a clipboard text.                         | `async (string) => void`        | `undefined`   |
 | `drawer`           | User-defined screen drawer instance (see below section).          | `ScreenDrawer`                  | `undefined`   |
+
+All properties are optional.
 
 ### `useVim()` hook
 
@@ -97,8 +99,9 @@ element in your component. This value is set to `null` if `drawer` property is s
 The second element is a ref to a input element to catch key input. You must put it to `<input/>` element
 in your component. This value is set to `null` if `drawer` property is set.
 
-The third element is a `VimWasm` instance. Some operations (such as `.cmdline()` method) can be done
-via this instance. Please read [vim.wasm document](https://github.com/rhysd/vim.wasm/tree/wasm/wasm#readme) for more details.
+The third element is a `VimWasm` instance. Some operations (such as calling `.cmdline()` method) can be done
+via this instance. Please read [vim.wasm document](https://github.com/rhysd/vim.wasm/tree/wasm/wasm#readme)
+for more details.
 
 ### `checkVimWasmIsAvailable()` utility
 
