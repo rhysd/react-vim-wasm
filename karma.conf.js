@@ -34,5 +34,13 @@ module.exports = function(config) {
                 timeout: 5000,
             },
         },
+
+        // For Travis CI: https://docs.travis-ci.com/user/chrome#karma-chrome-launcher
+        customLaunchers: {
+            ChromeHeadlessNoSandbox: {
+                base: 'ChromeHeadless',
+                flags: ['--no-sandbox']
+            }
+        }
     });
 };
