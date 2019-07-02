@@ -12,13 +12,15 @@ module.exports = {
     env: {
         es6: true,
         browser: true,
+        mocha: true,
     },
     globals: {
         SharedArrayBuffer: 'readonly',
         Atomics: 'readonly',
     },
     parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint', 'security', 'react', 'react-hooks', 'prettier'],
+    plugins: ['@typescript-eslint', 'security', 'react', 'react-hooks', 'prettier', 'mocha'],
+
     parserOptions: {
         project: './tsconfig.json',
         ecmaFeatures: {
@@ -45,6 +47,13 @@ module.exports = {
         // Enabled
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
         'react-hooks/exhaustive-deps': 'error', // Checks effect dependencies
+        'mocha/no-exclusive-tests': 'error',
+        'mocha/handle-done-callback': 'error',
+        'mocha/no-identical-title': 'error',
+        'mocha/no-mocha-arrows': 'error',
+        'mocha/no-return-and-callback': 'error',
+        'mocha/no-sibling-hooks': 'error',
+        'mocha/prefer-arrow-callback': 'error',
 
         // Configured
         '@typescript-eslint/array-type': ['error', 'array-simple'],

@@ -18,7 +18,7 @@ hash="$(git rev-parse HEAD)"
 
 git checkout gh-pages
 cp ./example/bundle.js .
-cp ./example/_index.html index.html
+mv ./example/_index.html index.html
 
 cp ./node_modules/bulma/css/bulma.min.css ./static/css/
 cp ./node_modules/github-fork-ribbon-css/gh-fork-ribbon.css ./static/css/

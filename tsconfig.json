@@ -18,6 +18,7 @@
   },
   "files": [
     "index.tsx",
+    "test/smoke.tsx",
     "example/index.tsx"
   ]
 }

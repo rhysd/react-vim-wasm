@@ -10,7 +10,8 @@ before_script:
 script:
   - npm run build
   - npm run lint
-  - npm test
+  - npm test -- --browsers ChromeHeadlessNoSandbox
+  - npm run dts-test
 
 cache:
   npm: true
