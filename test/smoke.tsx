@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
-import { ok } from 'assert';
+import { ok, strictEqual as eq } from 'assert';
 import * as sinon from 'sinon';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -27,6 +27,7 @@ describe('react-vim-wasm', function() {
         const onVimInit = sinon.spy();
         const onVimExit = sinon.spy();
         const onError = sinon.spy();
+        const onFileExport = sinon.spy();
         let vim: VimWasm | null = null;
 
         ReactDOM.render(
@@ -35,6 +36,7 @@ describe('react-vim-wasm', function() {
                 onVimInit={onVimInit}
                 onVimExit={onVimExit}
                 onError={onError}
+                onFileExport={onFileExport}
                 onVimCreated={v => {
                     vim = v;
                 }}
@@ -52,6 +54,25 @@ describe('react-vim-wasm', function() {
             .then(() => {
                 ok(vim, 'Vim did not start');
                 ok(onVimInit.called, 'onVimInit was not called');
+
+                const lines = ['hello!', 'this is', 'test for dropFiles!'];
+                const text = lines.join('\n') + '\n';
+                const filename = 'hello.txt';
+                const encoder = new TextEncoder();
+                const array = encoder.encode(text);
+
+                return vim!.dropFile(filename, array.buffer);
+            })
+            .then(() => wait(500))
+            .then(() => vim!.cmdline('export /hello.txt'))
+            .then(() => wait(500))
+            .then(() => {
+                ok(onFileExport, 'onFileExport was not called');
+                const [f, a] = onFileExport.args[0];
+                eq(f, '/hello.txt');
+                ok(a instanceof ArrayBuffer, 'file content is not arrray buffer: ' + ArrayBuffer.toString());
+            })
+            .then(() => {
                 vim!.cmdline('qall!');
                 // Wait for Vim shutting down
                 return wait(500);
