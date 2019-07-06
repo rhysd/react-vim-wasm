@@ -34,6 +34,7 @@ export interface VimProps {
     persistentDirs?: string[];
     className?: string;
     style?: React.CSSProperties;
+    id?: string;
     onVimCreated?: (vim: VimWasm) => void;
 }
 
@@ -159,7 +160,17 @@ export const Vim: React.SFC<VimProps> = props => {
         return null;
     }
 
-    const { style, className, onVimExit, onVimInit, onFileExport, onWriteClipboard, onError, readClipboard } = props;
+    const {
+        style,
+        className,
+        id,
+        onVimExit,
+        onVimInit,
+        onFileExport,
+        onWriteClipboard,
+        onError,
+        readClipboard,
+    } = props;
     if (vim !== null) {
         vim.onVimExit = onVimExit;
         vim.onVimInit = onVimInit;
@@ -171,7 +182,7 @@ export const Vim: React.SFC<VimProps> = props => {
 
     return (
         <>
-            <canvas ref={canvasRef} style={style} className={className} />
+            <canvas ref={canvasRef} style={style} className={className} id={id} />
             <input ref={inputRef} style={INPUT_STYLE} autoComplete="off" autoFocus />
         </>
     );

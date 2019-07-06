@@ -53,6 +53,7 @@ Properties of `<Vim/>` are as follows:
 | `worker`           | File path to worker script `vim.js` in `vim-wasm` package.        | `string`                        | `"vim.js"`    |
 | `className`        | Class name added to underlying `<canvas/>` DOM element.           | `string`                        | `undefined`   |
 | `style`            | `style` attribute value of underlying `<canvas/>` dom element.    | `Object`                        | `undefined`   |
+| `id`               | `id` attribute value of underlying `<canvas/>` dom element.       | `string`                        | `undefined`   |
 | `debug`            | Enable JavaScript debug logging to console.                       | `boolean`                       | `false`       |
 | `perf`             | Enable performance tracing and dump result at Vim exiting.        | `boolean`                       | `false`       |
 | `clipboard`        | Explicitly enable/disable clipboard register support.             | `boolean`                       | `true`        |
