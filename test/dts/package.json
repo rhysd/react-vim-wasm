@@ -11,8 +11,5 @@
   "license": "MIT",
   "dependencies": {
     "react-vim-wasm": "*"
-  },
-  "devDependencies": {
-    "@types/react": "^16.8.22"
   }
 }
