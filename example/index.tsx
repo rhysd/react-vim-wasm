@@ -68,6 +68,7 @@ const Control: React.SFC<{ vim: VimWasm | null }> = ({ vim }) => {
 };
 
 const VIM_WASM_AVAILABLITY_MESSAGE = checkVimWasmIsAvailable();
+const DOT_VIM_DIRS = ['/home/web_user/.vim'];
 
 const VimWasmExample: React.SFC = () => {
     const [vim, setVim] = useState<VimWasm | null>(null);
@@ -91,6 +92,7 @@ const VimWasmExample: React.SFC = () => {
             <Vim
                 worker="./static/vim-wasm/vim.js"
                 className="vim-screen"
+                persistentDirs={DOT_VIM_DIRS}
                 onVimExit={onVimExit}
                 onFileExport={downloadFile}
                 readClipboard={navigator.clipboard && navigator.clipboard.readText}

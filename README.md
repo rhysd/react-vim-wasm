@@ -56,6 +56,9 @@ Properties of `<Vim/>` are as follows:
 | `debug`            | Enable JavaScript debug logging to console.                       | `boolean`                       | `false`       |
 | `perf`             | Enable performance tracing and dump result at Vim exiting.        | `boolean`                       | `false`       |
 | `clipboard`        | Explicitly enable/disable clipboard register support.             | `boolean`                       | `true`        |
+| `files`            | Object that file paths to file contents.                          | `{ [fpath: string]: string }`   | `{}`          |
+| `dirs`             | Array of new directory paths created before Vim startup           | `string[]`                      | `[]`          |
+| `persistentDirs`   | Array of existing directory paths which are persistent with IDB   | `string[]`                      | `[]`          |
 | `onVimCreated`     | Callback called at creating a `VimWasm` instance.                 | `(VimWasm) => void`             | `undefined`   |
 | `onError`          | Callback called when an error is thrown in worker.                | `(Error) => void`               | `undefined`   |
 | `onVimInit`        | Callback called at initializing Vim worker instance.              | `() => void`                    | `undefined`   |
@@ -65,7 +68,8 @@ Properties of `<Vim/>` are as follows:
 | `onWriteClipboard` | Async function to write a clipboard text.                         | `async (string) => void`        | `undefined`   |
 | `drawer`           | User-defined screen drawer instance (see below section).          | `ScreenDrawer`                  | `undefined`   |
 
-All properties are optional.
+All properties are optional. For filetype support, please read
+[these docs](https://github.com/rhysd/vim.wasm/tree/wasm/wasm#filesystem-setup) also.
 
 ### `useVim()` hook
 

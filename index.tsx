@@ -29,6 +29,9 @@ export interface VimProps {
     readClipboard?: () => Promise<string>;
     onWriteClipboard?: (text: string) => Promise<void>;
     onError?: (err: Error) => void;
+    files?: { [path: string]: string };
+    dirs?: string[];
+    persistentDirs?: string[];
     className?: string;
     style?: React.CSSProperties;
     onVimCreated?: (vim: VimWasm) => void;
@@ -46,6 +49,9 @@ export function useVim({
     readClipboard,
     onWriteClipboard,
     onError,
+    files,
+    dirs,
+    persistentDirs,
     onVimCreated,
 }: VimProps): [
     React.MutableRefObject<HTMLCanvasElement | null> | null,
@@ -110,7 +116,7 @@ export function useVim({
             onVimCreated(v);
         }
 
-        v.start({ debug, perf, clipboard });
+        v.start({ debug, perf, clipboard, files, dirs, persistentDirs });
         setVim(v);
 
         return () => {
@@ -120,7 +126,7 @@ export function useVim({
             }
         };
         /* eslint-disable react-hooks/exhaustive-deps */
-    }, [worker, debug, perf, clipboard]);
+    }, [worker, debug, perf, clipboard, files, dirs, persistentDirs]);
     // Note: Vim worker should be started once at componentDidMount
     // `worker`, `debug`, `perf` and `clipboard` are startup configuration. So when they are changed,
     // new Vim instance must be created with the new configuration.
