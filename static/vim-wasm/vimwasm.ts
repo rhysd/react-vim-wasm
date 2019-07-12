@@ -12,17 +12,7 @@
  * vimwasm.ts: TypeScript main thread module for Wasm port of Vim by @rhysd.
  */
 
-import {
-    MessageKindFromWorker,
-    MessageFromWorker,
-    DrawEventHandler,
-    DrawEventMessage,
-    StartMessageFromMain,
-    FileBufferMessageFromWorker,
-    ClipboardBufMessageFromWorker,
-    CmdlineResultFromWorker,
-    EventStatusFromMain,
-} from './common_types';
+/// <reference path="common.d.ts"/>
 
 type PerfMark = 'init' | 'raf' | 'draw';
 
@@ -32,6 +22,7 @@ export interface ScreenDrawer {
     onVimExit(): void;
     getDomSize(): { width: number; height: number };
     setPerf(enabled: boolean): void;
+    focus(): void;
 }
 
 export interface KeyModifiers {
@@ -54,6 +45,21 @@ const STATUS_REQUEST_CLIPBOARD_BUF = 5 as const;
 const STATUS_NOTIFY_CLIPBOARD_WRITE_COMPLETE = 6 as const;
 const STATUS_REQUEST_CMDLINE = 7 as const;
 
+export function checkBrowserCompatibility(): string | undefined {
+    function notSupported(feat: string): string {
+        return `${feat} is not supported by this browser. If you're using Firefox or Safari, please enable feature flag.`;
+    }
+
+    if (typeof SharedArrayBuffer === 'undefined') {
+        return notSupported('SharedArrayBuffer');
+    }
+    if (typeof Atomics === 'undefined') {
+        return notSupported('Atomics API');
+    }
+
+    return undefined;
+}
+
 export class VimWorker {
     public debug: boolean;
     public readonly sharedBuffer: Int32Array;
@@ -73,8 +79,10 @@ export class VimWorker {
         this.debug = false;
     }
 
-    finalize() {
+    terminate() {
+        this.worker.terminate();
         this.worker.onmessage = null;
+        debug('Terminated worker thread. Thank you for working hard!');
     }
 
     sendStartMessage(msg: StartMessageFromMain) {
@@ -353,10 +361,10 @@ export class InputHandler {
             }
         }
 
-        if (key === '\u00A5' || event.code === 'IntlYen') {
-            // Note: Yen needs to be fixed to backslash
-            // Note: Also check event.code since Ctrl + yen is recognized as Ctrl + | due to Chrome bug.
-            // https://bugs.chromium.org/p/chromium/issues/detail?id=871650
+        // Note: Yen needs to be fixed to backslash
+        // Note: Also check event.code since Ctrl + yen is recognized as Ctrl + | due to Chrome bug.
+        // https://bugs.chromium.org/p/chromium/issues/detail?id=871650
+        if (key === '\u00A5' || (!shift && key === '|' && event.code === 'IntlYen')) {
             key = '\\';
         }
 
@@ -447,6 +455,10 @@ export class ScreenCanvas implements DrawEventHandler, ScreenDrawer {
         this.queue.push(msg);
     }
 
+    focus() {
+        this.input.focus();
+    }
+
     getDomSize() {
         return {
             width: this.resizer.elemWidth,
@@ -524,7 +536,13 @@ export class ScreenCanvas implements DrawEventHandler, ScreenDrawer {
         const descent = (lh - ch) / 2;
         const yi = Math.floor(y + lh - descent);
         for (let i = 0; i < text.length; ++i) {
-            this.ctx.fillText(text[i], Math.floor(x + cw * i), yi);
+            const c = text[i];
+            if (c === ' ') {
+                // Note: Skip rendering whitespace
+                // XXX: This optimization assumes current font renders nothing on whitespace.
+                continue;
+            }
+            this.ctx.fillText(c, Math.floor(x + cw * i), yi);
         }
 
         if (underline) {
@@ -625,6 +643,10 @@ export interface StartOptions {
     debug?: boolean;
     perf?: boolean;
     clipboard?: boolean;
+    persistentDirs?: string[];
+    dirs?: string[];
+    files?: { [fpath: string]: string };
+    cmdArgs?: string[];
 }
 export interface OptionsRenderToDOM {
     canvas: HTMLCanvasElement;
@@ -647,13 +669,15 @@ export class VimWasm {
     private readonly worker: VimWorker;
     private readonly screen: ScreenDrawer;
     private perf: boolean;
+    private debug: boolean;
     private perfMessages: { [name: string]: number[] };
     private running: boolean;
     private end: boolean;
 
     constructor(opts: VimWasmConstructOptions) {
         const script = opts.workerScriptPath || './vim.js';
-        this.worker = new VimWorker(script, this.onMessage.bind(this), this.onErr.bind(this));
+        this.handleError = this.handleError.bind(this);
+        this.worker = new VimWorker(script, this.onMessage.bind(this), this.handleError);
         if ('canvas' in opts && 'input' in opts) {
             this.screen = new ScreenCanvas(this.worker, opts.canvas, opts.input);
         } else if ('screen' in opts) {
@@ -662,6 +686,7 @@ export class VimWasm {
             throw new Error('Invalid options for VimWasm construction: ' + JSON.stringify(opts));
         }
         this.perf = false;
+        this.debug = false;
         this.perfMessages = {};
         this.running = false;
         this.end = false;
@@ -680,6 +705,7 @@ export class VimWasm {
         }
 
         this.perf = !!o.perf;
+        this.debug = !!o.debug;
         this.screen.setPerf(this.perf);
         this.running = true;
 
@@ -691,9 +717,13 @@ export class VimWasm {
             buffer: this.worker.sharedBuffer,
             canvasDomWidth: width,
             canvasDomHeight: height,
-            debug: !!o.debug,
+            debug: this.debug,
             perf: this.perf,
             clipboard: !!o.clipboard,
+            files: o.files || {},
+            dirs: o.dirs || [],
+            persistent: o.persistentDirs || [],
+            cmdArgs: o.cmdArgs || [],
         };
         this.worker.sendStartMessage(msg);
 
@@ -737,7 +767,7 @@ export class VimWasm {
         const reader = new FileReader();
         for (const file of files) {
             const [name, contents] = await this.readFile(reader, file);
-            this.dropFile(name, contents);
+            await this.dropFile(name, contents);
         }
     }
 
@@ -771,6 +801,10 @@ export class VimWasm {
 
     isRunning() {
         return this.running;
+    }
+
+    focus() {
+        this.screen.focus();
     }
 
     private async readFile(reader: FileReader, file: File) {
@@ -815,7 +849,7 @@ export class VimWasm {
                         });
                 } else {
                     debug('Cannot read clipboard because VimWasm.readClipboard is not set');
-                    this.worker.responseClipboardText('', true);
+                    this.worker.responseClipboardText('', true).catch(this.handleError);
                 }
                 break;
             case 'write-clipboard':
@@ -849,30 +883,33 @@ export class VimWasm {
                 break;
             case 'exit':
                 this.screen.onVimExit();
-                this.worker.finalize();
+                this.printPerfs();
+
+                this.worker.terminate();
+
                 if (this.onVimExit) {
                     this.onVimExit(msg.status);
                 }
 
-                this.printPerfs();
+                debug('Vim exited with status', msg.status);
 
                 this.perf = false;
+                this.debug = false;
                 this.screen.setPerf(false);
                 this.running = false;
                 this.end = true;
-
-                debug('Vim exited with status', msg.status);
                 break;
             case 'error':
                 debug('Vim threw an error:', msg.message);
-                this.onErr(new Error(msg.message));
+                this.handleError(new Error(msg.message));
+                this.worker.terminate();
                 break;
             default:
                 throw new Error(`Unexpected message from worker: ${JSON.stringify(msg)}`);
         }
     }
 
-    private onErr(err: Error) {
+    private handleError(err: Error) {
         if (this.onError) {
             this.onError(err);
         }

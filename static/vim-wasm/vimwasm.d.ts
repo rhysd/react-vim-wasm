@@ -1,4 +1,4 @@
-import { MessageFromWorker, DrawEventHandler, DrawEventMessage, StartMessageFromMain } from './common_types';
+/// <reference path="common.d.ts" />
 export interface ScreenDrawer {
     draw(msg: DrawEventMessage): void;
     onVimInit(): void;
@@ -8,6 +8,7 @@ export interface ScreenDrawer {
         height: number;
     };
     setPerf(enabled: boolean): void;
+    focus(): void;
 }
 export interface KeyModifiers {
     ctrl?: boolean;
@@ -15,6 +16,7 @@ export interface KeyModifiers {
     alt?: boolean;
     meta?: boolean;
 }
+export declare function checkBrowserCompatibility(): string | undefined;
 export declare class VimWorker {
     debug: boolean;
     readonly sharedBuffer: Int32Array;
@@ -23,7 +25,7 @@ export declare class VimWorker {
     private readonly onError;
     private onOneshotMessage;
     constructor(scriptPath: string, onMessage: (msg: MessageFromWorker) => void, onError: (err: Error) => void);
-    finalize(): void;
+    terminate(): void;
     sendStartMessage(msg: StartMessageFromMain): void;
     writeOpenFileRequestEvent(name: string, size: number): void;
     notifyOpenFileBufComplete(): void;
@@ -78,6 +80,7 @@ export declare class ScreenCanvas implements DrawEventHandler, ScreenDrawer {
     onVimInit(): void;
     onVimExit(): void;
     draw(msg: DrawEventMessage): void;
+    focus(): void;
     getDomSize(): {
         width: number;
         height: number;
@@ -100,6 +103,12 @@ export interface StartOptions {
     debug?: boolean;
     perf?: boolean;
     clipboard?: boolean;
+    persistentDirs?: string[];
+    dirs?: string[];
+    files?: {
+        [fpath: string]: string;
+    };
+    cmdArgs?: string[];
 }
 export interface OptionsRenderToDOM {
     canvas: HTMLCanvasElement;
@@ -121,6 +130,7 @@ export declare class VimWasm {
     private readonly worker;
     private readonly screen;
     private perf;
+    private debug;
     private perfMessages;
     private running;
     private end;
@@ -132,9 +142,10 @@ export declare class VimWasm {
     sendKeydown(key: string, keyCode: number, modifiers?: KeyModifiers): void;
     cmdline(cmdline: string): Promise<void>;
     isRunning(): boolean;
+    focus(): void;
     private readFile;
     private onMessage;
-    private onErr;
+    private handleError;
     private printPerfs;
     private perfMark;
     private perfMeasure;

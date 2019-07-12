@@ -1,7 +1,18 @@
 [npm][] package for [vim.wasm][project]
 =======================================
+[![Build Status][travis-ci-badge]][travis-ci]
+[![npm version][npm-badge]][npm-pkg]
+[![code style: prettier][prettier-badge]][prettier]
 
 **WARNING!: This npm package is experimental until v0.1.0 beta release.**
+
+This is an [npm][] package to install pre-built [vim.wasm][project] binary easily. This package contains:
+
+- `vim.wasm`: WebAssembly binary
+- `vim.js`: Web Worker script to drive `vim.wasm`
+- `vimwasm.js`: ES Module to manage lifetime of Web Worker
+
+Please read the following instructions to use this package.
 
 ## Installation
 
@@ -61,6 +72,32 @@ Serve `index.html` with HTTP server and access to it on a browser.
 Only Chrome or Chromium-based browsers enable them by default. For Firefox and Safari, feature flag must
 be enabled manually for now to enable them. Please also read notices in README.md at [the project page][project].
 
+### Related Projects
+
+Following projects are related to this npm package and may be more suitable for your use case.
+
+- [react-vim-wasm](https://github.com/rhysd/react-vim-wasm): [React](https://reactjs.org/) component for [vim.wasm][project].
+  Vim editor can be embedded in your React web application.
+
+## Check Browser Compatibility
+
+This npm package runs Vim in Web Worker and the main thread communicates with the worker thread via `SharedArrayBuffer`.
+Chrome or Chromium based browser supports `SharedArrayBuffer` by default. Safari and Firefox supports it under a feature
+flag due to Spectre vulnerability.
+
+To check current browser can use this package, `checkBrowserCompatibility()` utility function is provided.
+It returns an error message as string if it is not compatible (otherwise returns `undefined`).
+
+```javascript
+const errmsg = checkBrowserCompatibility();
+if (errmsg !== undefined) {
+    alert(errmsg);
+    return;
+}
+
+const vim = new VimWasm({...});
+```
+
 ## Logging
 
 Hosting this directory with web server, setting a query parameter `debug=1` to the URL enables all debug logs.
@@ -75,7 +112,7 @@ vim.start({ debug: true });
 
 ## Performance
 
-Hosting this directory with web server, a query parameter `perf=1` to the URL enables performance trancing.
+Hosting this directory with web server, a query parameter `perf=1` to the URL enables performance tracing.
 After Vim exits (e.g. `:qall!`), it dumps performance measurements in DevTools console as tables.
 
 As JavaScript API, passing `perf: true` to `VimWasm.start()` method call enables the performance tracing.
@@ -89,6 +126,25 @@ vim.start({ perf: true });
 **Note:** Please do not use `debug=1` at the same time. Outputting console logs in DevTools slows application.
 
 **Note:** 'Vim exits with status N' dialog does not show up not to prevent performance measurements.
+
+## Program Arguments
+
+Passing program arguments of `vim` command is supported.
+
+Hosting this directory with web server, `arg` query parameters are passed to Vim command arguments. For example,
+passing `-c 'split ~/source.c'` to Vim can be done with query parameters `?arg=-c&arg=split%20~%2fsource.c`
+(`%20` is white space and `%2f` is slash). One `arg=` query parameter is corresponding to one argument.
+
+As JavaScript API, passing `cmdArgs` option to `VimWasm.start()` method call passes the value as Vim
+command arguments.
+
+```javascript
+vim.start({
+  cmdArgs: [ '~/.vim/vimrc', '-c', 'set number' ]
+});
+```
+
+As shown in above example, this feature is useful when you want to open specific file at Vim startup.
 
 ## Set Font
 
@@ -117,6 +173,64 @@ If you want to specify font name and font height from JavaScript, set it via `Vi
 vim.cmdline(`set guifont=${fontName}:h{fontHeight}`);
 ```
 
+## FileSystem Setup
+
+`VimWasm.start()` method supports filesystem setup before starting Vim through `dirs`, `files` and
+`persistentDirs` options.
+
+`dirs` option creates new directories on filesystem. They are created on memory using emscripten's
+`MEMFS` by default. Note that nested directory paths are not available.
+
+Notes:
+
+- You must specify each parent directories to create a nested directory.
+- Trying to create an existing directory causes an error.
+
+```javascript
+// Create /work/documents directory
+vim.start({
+    dirs: ['/work', '/work/documents'],
+});
+```
+
+`persistentDirs` option marks the directories are persistent. They are stored on [Indexed DB][idb]
+thanks to emscripten's `IDBFS`. They will remain even if user closes a browser tab.
+
+Notes:
+
+- Marking non-existing directories as persistent causes an error. Please set `dirs` correctly to ensure
+  they exists.
+- Files are synchronized when Vim exits. Closing browser tab without `:quit` does not save files on Indexed DB.
+  This behavior may change in the future.
+- This option adds overhead to load files from database at Vim startup.
+
+```javascript
+// Create /work/persistent directory. Contents of the directory are persistent
+vim.start({
+    dirs: ['/work', '/work/persistent'],
+    persistentDirs: ['/work/persistent'],
+});
+```
+
+`files` option creates files on filesystem. It is an object whose keys are file paths and values are files'
+contents as `String`.
+
+Notes:
+
+- Parent directories must exist for the files. If they don't exist, please create them by `dirs` option.
+- You can overwrite default vimrc as below example.
+
+```javascript
+// Create new file /work/hello.txt and overwrite vimrc
+vim.start({
+    dirs: ['/work'],
+    files: {
+        '/work/hello.txt': 'hello, world!\n',
+        '/.vim/vimrc': 'set number\nset noexpandtab\n',
+    },
+});
+```
+
 ## TypeScript support
 
 [npm package][npm-pkg] provides complete TypeScript support. Type definitions are put in `vimwasm.d.ts`
@@ -138,6 +252,24 @@ be generated.  Please host this directory on web server and access to `index.htm
 
 Files are formatted by [prettier](https://prettier.io/).
 
+## Testing
+
+Unit tests are developed at [test](./test) directory. Since `vim.wasm` assumes to be run on browsers, they are run
+on headless Chromium using [karma](https://karma-runner.github.io/latest/index.html) test runner.
+Basically unit test cases run Vim worker and check draw events from it. Headless Chromium is installed in `node_modules`
+locally by puppeteer.
+
+```sh
+# Single run
+npm test
+
+# Watch test source files and run tests on changes
+npm run karma
+
+# Use normal Chromium instead of headless version
+npm run karma -- --browsers Chrome
+```
+
 ## Notes
 
 ### ES Modules in Worker
@@ -146,7 +278,7 @@ source (here `runtime.js`). It parses the source but the parser only accepts spe
 seems to ignore all declarations which don't appear in `mergeInto` call. Dynamic import is also not available for now.
 
 - `import` statement is not available since the `emcc` JS parser cannot parse it
-- Dymanic import is not available in dedicated worker: https://bugs.chromium.org/p/chromium/issues/detail?id=680046
+- Dynamic import is not available in dedicated worker: https://bugs.chromium.org/p/chromium/issues/detail?id=680046
 - Bundled JS sources by bundlers such as parcel cannot be parsed by the `emcc` JS parser
 - Compiling TS sources into one JS file using `--outFile=xxx.js` does not work since toplevel constants are ignored by
   the `emcc` JS parser
@@ -174,3 +306,9 @@ There were 3 trials but all were not available for now.
 [project]: https://github.com/rhysd/vim.wasm
 [shared-array-buffer]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer
 [atomics-api]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Atomics
+[idb]: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+[travis-ci-badge]: https://travis-ci.org/rhysd/vim.wasm.svg?branch=wasm
+[travis-ci]: https://travis-ci.org/rhysd/vim.wasm
+[npm-badge]: https://badge.fury.io/js/vim-wasm.svg
+[prettier-badge]: https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat
+[prettier]: https://github.com/prettier/prettier
