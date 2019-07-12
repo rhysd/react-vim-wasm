@@ -167,6 +167,11 @@ $ npm run fix
 
 # Deploy to gh-pages
 $ npm run gh-pages
+
+# Build and run unit tests
+$ npm run watch:test # Watch files and run tests on change
+$ npm test           # Single run
+$ npm run karma      # Start Karma server
 ```
 
 ## License
