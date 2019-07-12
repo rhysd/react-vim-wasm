@@ -1,21 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { VimWasm, ScreenDrawer } from 'vim-wasm';
-
-export function checkVimWasmIsAvailable(): string | undefined {
-    function notSupported(feat: string): string {
-        return `${feat} is not supported by this browser. If you're using Firefox or Safari, please enable feature flag.`;
-    }
-
-    if (typeof SharedArrayBuffer === 'undefined') {
-        return notSupported('SharedArrayBuffer');
-    }
-    if (typeof Atomics === 'undefined') {
-        return notSupported('Atomics API');
-    }
-
-    return undefined;
-}
+export { checkBrowserCompatibility as checkVimWasmIsAvailable } from 'vim-wasm';
 
 export interface VimProps {
     worker?: string;
