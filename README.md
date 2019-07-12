@@ -58,8 +58,9 @@ Properties of `<Vim/>` are as follows:
 | `perf`             | Enable performance tracing and dump result at Vim exiting.        | `boolean`                       | `false`       |
 | `clipboard`        | Explicitly enable/disable clipboard register support.             | `boolean`                       | `true`        |
 | `files`            | Object that file paths to file contents.                          | `{ [fpath: string]: string }`   | `{}`          |
-| `dirs`             | Array of new directory paths created before Vim startup           | `string[]`                      | `[]`          |
-| `persistentDirs`   | Array of existing directory paths which are persistent with IDB   | `string[]`                      | `[]`          |
+| `dirs`             | Array of new directory paths created before Vim startup.          | `string[]`                      | `[]`          |
+| `persistentDirs`   | Array of existing directory paths which are persistent with IDB.  | `string[]`                      | `[]`          |
+| `cmdArgs`          | Array of command line arguments passed to `vim` process.          | `string[]`                      | `[]`          |
 | `onVimCreated`     | Callback called at creating a `VimWasm` instance.                 | `(VimWasm) => void`             | `undefined`   |
 | `onError`          | Callback called when an error is thrown in worker.                | `(Error) => void`               | `undefined`   |
 | `onVimInit`        | Callback called at initializing Vim worker instance.              | `() => void`                    | `undefined`   |
