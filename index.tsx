@@ -15,6 +15,7 @@ export interface VimProps {
     readClipboard?: () => Promise<string>;
     onWriteClipboard?: (text: string) => Promise<void>;
     onError?: (err: Error) => void;
+    onTitleUpdate?: (title: string) => void;
     files?: { [path: string]: string };
     dirs?: string[];
     persistentDirs?: string[];
@@ -37,6 +38,7 @@ export function useVim({
     readClipboard,
     onWriteClipboard,
     onError,
+    onTitleUpdate,
     files,
     dirs,
     persistentDirs,
@@ -74,6 +76,7 @@ export function useVim({
         v.onFileExport = onFileExport;
         v.readClipboard = readClipboard;
         v.onWriteClipboard = onWriteClipboard;
+        v.onTitleUpdate = onTitleUpdate;
         v.onError = onError;
 
         if (canvas.current !== null) {

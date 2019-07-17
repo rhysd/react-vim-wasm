@@ -65,7 +65,8 @@ Properties of `<Vim/>` are as follows:
 | `onError`          | Callback called when an error is thrown in worker.                | `(Error) => void`               | `undefined`   |
 | `onVimInit`        | Callback called at initializing Vim worker instance.              | `() => void`                    | `undefined`   |
 | `onVimExit`        | Callback called at Vim exiting.                                   | `(number) => void`              | `undefined`   |
-| `onFileExport`     | Callback when `:export` is run.                                   | `(string, ArrayBuffer) => void` | `undefined`   |
+| `onFileExport`     | Callback called when `:export` is run.                            | `(string, ArrayBuffer) => void` | `undefined`   |
+| `onTitleUpdate`    | Callback called when window title is updated.                     | `(string) => void`              | `undefined`   |
 | `readClipboard`    | Async function to read a clipboard text.                          | `async () => string`            | `undefined`   |
 | `onWriteClipboard` | Async function to write a clipboard text.                         | `async (string) => void`        | `undefined`   |
 | `drawer`           | User-defined screen drawer instance (see below section).          | `ScreenDrawer`                  | `undefined`   |
