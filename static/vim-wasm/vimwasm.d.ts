@@ -16,6 +16,8 @@ export interface KeyModifiers {
     alt?: boolean;
     meta?: boolean;
 }
+export declare const VIM_VERSION = "8.1.1661";
+export declare const VIM_FEATURE = "normal";
 export declare function checkBrowserCompatibility(): string | undefined;
 export declare class VimWorker {
     debug: boolean;
@@ -27,13 +29,15 @@ export declare class VimWorker {
     constructor(scriptPath: string, onMessage: (msg: MessageFromWorker) => void, onError: (err: Error) => void);
     terminate(): void;
     sendStartMessage(msg: StartMessageFromMain): void;
-    writeOpenFileRequestEvent(name: string, size: number): void;
-    notifyOpenFileBufComplete(): void;
+    notifyOpenFileBufComplete(filename: string, bufId: number): void;
+    notifyClipboardWriteComplete(cannotSend: boolean, bufId: number): void;
     notifyKeyEvent(key: string, keyCode: number, ctrl: boolean, shift: boolean, alt: boolean, meta: boolean): void;
     notifyResizeEvent(width: number, height: number): void;
-    requestOpenFileBuf(name: string, contents: ArrayBuffer): Promise<SharedArrayBuffer>;
-    responseClipboardText(text: string, cannotSend?: boolean): Promise<void>;
+    requestSharedBuffer(byteLength: number): Promise<[number, SharedArrayBuffer]>;
+    notifyClipboardError(): void;
+    responseClipboardText(text: string): Promise<void>;
     requestCmdline(cmdline: string): Promise<void>;
+    notifyErrorOutput(message: string): Promise<void>;
     private waitForOneshotMessage;
     private encodeStringToBuffer;
     private awakeWorkerThread;
@@ -127,6 +131,7 @@ export declare class VimWasm {
     onError?: (err: Error) => void;
     readClipboard?: () => Promise<string>;
     onWriteClipboard?: (text: string) => void;
+    onTitleUpdate?: (title: string) => void;
     private readonly worker;
     private readonly screen;
     private perf;
@@ -143,7 +148,9 @@ export declare class VimWasm {
     cmdline(cmdline: string): Promise<void>;
     isRunning(): boolean;
     focus(): void;
+    showError(message: string): Promise<void>;
     private readFile;
+    private evalJS;
     private onMessage;
     private handleError;
     private printPerfs;

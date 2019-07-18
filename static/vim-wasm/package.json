@@ -1,26 +1,31 @@
 {
-  "_from": "vim-wasm@~0.0.7",
-  "_id": "vim-wasm@0.0.8",
+  "_args": [
+    [
+      "vim-wasm@0.0.9",
+      "/Users/npsdev5/Develop/github.com/rhysd/react-vim-wasm"
+    ]
+  ],
+  "_from": "vim-wasm@0.0.9",
+  "_id": "vim-wasm@0.0.9",
   "_inBundle": false,
-  "_integrity": "sha512-8r83l73iT5JJV4Eqx3R0aDwfhVnTjiv+O/0vCa9To/2cJmdFF1v1lpNb54/oDup0WYmhbHXnt8bW4zs1Qys7jg==",
+  "_integrity": "sha512-/7jR0HWSmO8tUNIv+XPSNr0D21F/XjdPLzUQsZhkBM29ePrxHy/1N20mOKXR5DSU18Oqs7Jh2NPTIEv6ExCjsQ==",
   "_location": "/vim-wasm",
   "_phantomChildren": {},
   "_requested": {
-    "type": "range",
+    "type": "version",
     "registry": true,
-    "raw": "vim-wasm@~0.0.7",
+    "raw": "vim-wasm@0.0.9",
     "name": "vim-wasm",
     "escapedName": "vim-wasm",
-    "rawSpec": "~0.0.7",
+    "rawSpec": "0.0.9",
     "saveSpec": null,
-    "fetchSpec": "~0.0.7"
+    "fetchSpec": "0.0.9"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/vim-wasm/-/vim-wasm-0.0.8.tgz",
-  "_shasum": "a8db391832ddb069d418c7152f5459c4ed0d0497",
-  "_spec": "vim-wasm@~0.0.7",
+  "_resolved": "https://registry.npmjs.org/vim-wasm/-/vim-wasm-0.0.9.tgz",
+  "_spec": "0.0.9",
   "_where": "/Users/npsdev5/Develop/github.com/rhysd/react-vim-wasm",
   "author": {
     "name": "rhysd",
@@ -30,8 +35,6 @@
   "bugs": {
     "url": "https://github.com/rhysd/vim.wasm/issues"
   },
-  "bundleDependencies": false,
-  "deprecated": false,
   "description": "Vim editor ported to WebAssembly",
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -140,5 +143,5 @@
   },
   "type": "module",
   "types": "./vimwasm.d.ts",
-  "version": "0.0.8"
+  "version": "0.0.9"
 }

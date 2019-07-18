@@ -55,18 +55,14 @@ interface StartMessageFromMain {
     readonly cmdArgs: string[];
 }
 
-interface FileBufferMessageFromWorker {
-    readonly kind: 'open-file-buf:response';
-    readonly name: string;
-    readonly buffer: SharedArrayBuffer;
-}
-interface ClipboardBufMessageFromWorker {
-    readonly kind: 'clipboard-buf:response';
-    readonly buffer: SharedArrayBuffer;
-}
 interface CmdlineResultFromWorker {
     readonly kind: 'cmdline:response';
     readonly success: boolean;
+}
+interface SharedBufResponseFromWorker {
+    readonly kind: 'shared-buf:response';
+    readonly buffer: SharedArrayBuffer;
+    readonly bufId: number;
 }
 type MessageFromWorkerWithoutTS =
     | {
@@ -84,7 +80,6 @@ type MessageFromWorkerWithoutTS =
           readonly kind: 'exit';
           readonly status: number;
       }
-    | FileBufferMessageFromWorker
     | {
           readonly kind: 'export';
           readonly path: string;
@@ -93,12 +88,21 @@ type MessageFromWorkerWithoutTS =
     | {
           readonly kind: 'read-clipboard:request';
       }
-    | ClipboardBufMessageFromWorker
     | {
           readonly kind: 'write-clipboard';
           readonly text: string;
       }
-    | CmdlineResultFromWorker;
+    | CmdlineResultFromWorker
+    | SharedBufResponseFromWorker
+    | {
+          readonly kind: 'title';
+          readonly title: string;
+      }
+    | {
+          readonly kind: 'eval';
+          readonly path: string;
+          readonly contents: ArrayBuffer;
+      };
 
 type MessageFromWorker = MessageFromWorkerWithoutTS & { timestamp?: number };
 type MessageKindFromWorker = MessageFromWorker['kind'];
