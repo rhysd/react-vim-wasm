@@ -81,6 +81,9 @@ const VimWasmExample: React.SFC = () => {
     const onVimExit = useCallback((status: number) => {
         alert(`Vim exited with status ${status}`);
     }, []);
+    const onTitleUpdate = useCallback((title: string) => {
+        document.title = title;
+    }, []);
 
     if (VIM_WASM_AVAILABLITY_MESSAGE !== undefined) {
         const style = { color: 'red', fontWeight: 'bold' } as const;
@@ -99,6 +102,7 @@ const VimWasmExample: React.SFC = () => {
                 onWriteClipboard={navigator.clipboard && navigator.clipboard.writeText}
                 onError={onError}
                 onVimCreated={onVim}
+                onTitleUpdate={onTitleUpdate}
             />
             <Control vim={vim} />
         </>
