@@ -50,7 +50,7 @@ Properties of `<Vim/>` are as follows:
 
 | Property Name      | Description                                                       | Type                            | Default Value |
 |--------------------|-------------------------------------------------------------------|---------------------------------|---------------|
-| `worker`           | File path to worker script `vim.js` in `vim-wasm` package.        | `string`                        | `"vim.js"`    |
+| `worker`           | File path to worker script `vim.js` in `vim-wasm` package.        | `string`                        | NOT OPTIONAL  |
 | `className`        | Class name added to underlying `<canvas/>` DOM element.           | `string`                        | `undefined`   |
 | `style`            | `style` attribute value of underlying `<canvas/>` dom element.    | `Object`                        | `undefined`   |
 | `id`               | `id` attribute value of underlying `<canvas/>` dom element.       | `string`                        | `undefined`   |
@@ -71,7 +71,7 @@ Properties of `<Vim/>` are as follows:
 | `onWriteClipboard` | Async function to write a clipboard text.                         | `async (string) => void`        | `undefined`   |
 | `drawer`           | User-defined screen drawer instance (see below section).          | `ScreenDrawer`                  | `undefined`   |
 
-All properties are optional. For filetype support, please read
+All properties other than `worker` are optional. For filetype support, please read
 [these docs](https://github.com/rhysd/vim.wasm/tree/wasm/wasm#filesystem-setup) also.
 
 ### `useVim()` hook

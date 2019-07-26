@@ -4,7 +4,7 @@ import { VimWasm, ScreenDrawer } from 'vim-wasm';
 export { checkBrowserCompatibility as checkVimWasmIsAvailable } from 'vim-wasm';
 
 export interface VimProps {
-    worker?: string;
+    worker: string;
     drawer?: ScreenDrawer;
     debug?: boolean;
     perf?: boolean;
