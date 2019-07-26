@@ -90,20 +90,23 @@ const VimWasmExample: React.SFC = () => {
         return <div style={style}>{VIM_WASM_AVAILABLITY_MESSAGE}</div>;
     }
 
+    // Note: vim-screen must not have border
     return (
         <>
-            <Vim
-                worker="./static/vim-wasm/vim.js"
-                className="vim-screen"
-                persistentDirs={DOT_VIM_DIRS}
-                onVimExit={onVimExit}
-                onFileExport={downloadFile}
-                readClipboard={navigator.clipboard && navigator.clipboard.readText}
-                onWriteClipboard={navigator.clipboard && navigator.clipboard.writeText}
-                onError={onError}
-                onVimCreated={onVim}
-                onTitleUpdate={onTitleUpdate}
-            />
+            <div className="screen-wrapper">
+                <Vim
+                    worker="./static/vim-wasm/vim.js"
+                    className="vim-screen"
+                    persistentDirs={DOT_VIM_DIRS}
+                    onVimExit={onVimExit}
+                    onFileExport={downloadFile}
+                    readClipboard={navigator.clipboard && navigator.clipboard.readText}
+                    onWriteClipboard={navigator.clipboard && navigator.clipboard.writeText}
+                    onError={onError}
+                    onVimCreated={onVim}
+                    onTitleUpdate={onTitleUpdate}
+                />
+            </div>
             <Control vim={vim} />
         </>
     );
