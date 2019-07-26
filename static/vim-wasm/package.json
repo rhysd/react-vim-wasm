@@ -1,32 +1,27 @@
 {
-  "_args": [
-    [
-      "vim-wasm@0.0.9",
-      "/Users/npsdev5/Develop/github.com/rhysd/react-vim-wasm"
-    ]
-  ],
-  "_from": "vim-wasm@0.0.9",
-  "_id": "vim-wasm@0.0.9",
+  "_from": "vim-wasm@~0.0.10",
+  "_id": "vim-wasm@0.0.10",
   "_inBundle": false,
-  "_integrity": "sha512-/7jR0HWSmO8tUNIv+XPSNr0D21F/XjdPLzUQsZhkBM29ePrxHy/1N20mOKXR5DSU18Oqs7Jh2NPTIEv6ExCjsQ==",
+  "_integrity": "sha512-xN14Bu0wrS/FWcyjRJ3utz5JWcjiRQVogfFmKmT2ZB8xC3nKworqwlzxYpvyvPRy+nmbe50dZ/OFn/KU3yZI5A==",
   "_location": "/vim-wasm",
   "_phantomChildren": {},
   "_requested": {
-    "type": "version",
+    "type": "range",
     "registry": true,
-    "raw": "vim-wasm@0.0.9",
+    "raw": "vim-wasm@~0.0.10",
     "name": "vim-wasm",
     "escapedName": "vim-wasm",
-    "rawSpec": "0.0.9",
+    "rawSpec": "~0.0.10",
     "saveSpec": null,
-    "fetchSpec": "0.0.9"
+    "fetchSpec": "~0.0.10"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/vim-wasm/-/vim-wasm-0.0.9.tgz",
-  "_spec": "0.0.9",
-  "_where": "/Users/npsdev5/Develop/github.com/rhysd/react-vim-wasm",
+  "_resolved": "https://registry.npmjs.org/vim-wasm/-/vim-wasm-0.0.10.tgz",
+  "_shasum": "6dbd6f7ec5206464c9cfa6355538baf79714c66b",
+  "_spec": "vim-wasm@~0.0.10",
+  "_where": "/Users/rhayasd/Develop/github.com/rhysd/react-vim-wasm",
   "author": {
     "name": "rhysd",
     "email": "lin90162@yahoo.co.jp",
@@ -35,6 +30,8 @@
   "bugs": {
     "url": "https://github.com/rhysd/vim.wasm/issues"
   },
+  "bundleDependencies": false,
+  "deprecated": false,
   "description": "Vim editor ported to WebAssembly",
   "devDependencies": {
     "@types/chai": "^4.1.7",
@@ -99,7 +96,10 @@
     "vimwasm.js.map",
     "vimwasm.ts",
     "vimwasm.d.ts",
-    "common.d.ts"
+    "common.d.ts",
+    "small/vim.wasm",
+    "small/vim.data",
+    "small/vim.js"
   ],
   "homepage": "https://github.com/rhysd/vim.wasm#readme",
   "husky": {
@@ -130,8 +130,10 @@
     "karma": "karma start",
     "lint": "npm-run-all -p stylelint eslint prettier",
     "minify": "uglifyjs --output vim.js vim.js && uglifyjs --output main.js main.js && uglifyjs --output vimwasm.js vimwasm.js",
+    "minify:small": "uglifyjs --output small/vim.js small/vim.js",
     "prepublishOnly": "npm-run-all build minify",
     "prettier": "prettier --check --ignore-path .gitignore '*.ts'",
+    "preversion": "cd .. && ./build.sh release-all",
     "stylelint": "stylelint style.css",
     "test": "karma start --single-run",
     "watch": "npm-run-all -p watch:main watch:worker",
@@ -143,5 +145,5 @@
   },
   "type": "module",
   "types": "./vimwasm.d.ts",
-  "version": "0.0.9"
+  "version": "0.0.10"
 }

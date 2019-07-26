@@ -17,7 +17,6 @@ export interface KeyModifiers {
     meta?: boolean;
 }
 export declare const VIM_VERSION = "8.1.1661";
-export declare const VIM_FEATURE = "normal";
 export declare function checkBrowserCompatibility(): string | undefined;
 export declare class VimWorker {
     debug: boolean;
@@ -117,11 +116,11 @@ export interface StartOptions {
 export interface OptionsRenderToDOM {
     canvas: HTMLCanvasElement;
     input: HTMLInputElement;
-    workerScriptPath?: string;
+    workerScriptPath: string;
 }
 export interface OptionsUserRenderer {
     screen: ScreenDrawer;
-    workerScriptPath?: string;
+    workerScriptPath: string;
 }
 export declare type VimWasmConstructOptions = OptionsRenderToDOM | OptionsUserRenderer;
 export declare class VimWasm {
