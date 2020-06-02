@@ -17,6 +17,7 @@ export interface VimProps {
     onError?: (err: Error) => void;
     onTitleUpdate?: (title: string) => void;
     files?: { [path: string]: string };
+    fetchFiles?: { [path: string]: string };
     dirs?: string[];
     persistentDirs?: string[];
     cmdArgs?: string[];
@@ -40,6 +41,7 @@ export function useVim({
     onError,
     onTitleUpdate,
     files,
+    fetchFiles,
     dirs,
     persistentDirs,
     cmdArgs,
@@ -108,7 +110,7 @@ export function useVim({
             onVimCreated(v);
         }
 
-        v.start({ debug, perf, clipboard, files, dirs, persistentDirs, cmdArgs });
+        v.start({ debug, perf, clipboard, files, fetchFiles, dirs, persistentDirs, cmdArgs });
         setVim(v);
 
         return () => {
