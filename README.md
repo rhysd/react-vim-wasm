@@ -48,28 +48,29 @@ For real example, please read [example code](./example).
 
 Properties of `<Vim/>` are as follows:
 
-| Property Name      | Description                                                       | Type                            | Default Value |
-|--------------------|-------------------------------------------------------------------|---------------------------------|---------------|
-| `worker`           | File path to worker script `vim.js` in `vim-wasm` package.        | `string`                        | NOT OPTIONAL  |
-| `className`        | Class name added to underlying `<canvas/>` DOM element.           | `string`                        | `undefined`   |
-| `style`            | `style` attribute value of underlying `<canvas/>` dom element.    | `Object`                        | `undefined`   |
-| `id`               | `id` attribute value of underlying `<canvas/>` dom element.       | `string`                        | `undefined`   |
-| `debug`            | Enable JavaScript debug logging to console.                       | `boolean`                       | `false`       |
-| `perf`             | Enable performance tracing and dump result at Vim exiting.        | `boolean`                       | `false`       |
-| `clipboard`        | Explicitly enable/disable clipboard register support.             | `boolean`                       | `true`        |
-| `files`            | Object that file paths to file contents.                          | `{ [fpath: string]: string }`   | `{}`          |
-| `dirs`             | Array of new directory paths created before Vim startup.          | `string[]`                      | `[]`          |
-| `persistentDirs`   | Array of existing directory paths which are persistent with IDB.  | `string[]`                      | `[]`          |
-| `cmdArgs`          | Array of command line arguments passed to `vim` process.          | `string[]`                      | `[]`          |
-| `onVimCreated`     | Callback called at creating a `VimWasm` instance.                 | `(VimWasm) => void`             | `undefined`   |
-| `onError`          | Callback called when an error is thrown in worker.                | `(Error) => void`               | `undefined`   |
-| `onVimInit`        | Callback called at initializing Vim worker instance.              | `() => void`                    | `undefined`   |
-| `onVimExit`        | Callback called at Vim exiting.                                   | `(number) => void`              | `undefined`   |
-| `onFileExport`     | Callback called when `:export` is run.                            | `(string, ArrayBuffer) => void` | `undefined`   |
-| `onTitleUpdate`    | Callback called when window title is updated.                     | `(string) => void`              | `undefined`   |
-| `readClipboard`    | Async function to read a clipboard text.                          | `async () => string`            | `undefined`   |
-| `onWriteClipboard` | Async function to write a clipboard text.                         | `async (string) => void`        | `undefined`   |
-| `drawer`           | User-defined screen drawer instance (see below section).          | `ScreenDrawer`                  | `undefined`   |
+| Property Name      | Description                                                        | Type                            | Default Value |
+|--------------------|--------------------------------------------------------------------|---------------------------------|---------------|
+| `worker`           | File path to worker script `vim.js` in `vim-wasm` package.         | `string`                        | NOT OPTIONAL  |
+| `className`        | Class name added to underlying `<canvas/>` DOM element.            | `string`                        | `undefined`   |
+| `style`            | `style` attribute value of underlying `<canvas/>` dom element.     | `Object`                        | `undefined`   |
+| `id`               | `id` attribute value of underlying `<canvas/>` dom element.        | `string`                        | `undefined`   |
+| `debug`            | Enable JavaScript debug logging to console.                        | `boolean`                       | `false`       |
+| `perf`             | Enable performance tracing and dump result at Vim exiting.         | `boolean`                       | `false`       |
+| `clipboard`        | Explicitly enable/disable clipboard register support.              | `boolean`                       | `true`        |
+| `files`            | Object that file paths to file contents.                           | `{ [fpath: string]: string }`   | `{}`          |
+| `dirs`             | Array of new directory paths created before Vim startup.           | `string[]`                      | `[]`          |
+| `persistentDirs`   | Array of existing directory paths which are persistent with IDB.   | `string[]`                      | `[]`          |
+| `cmdArgs`          | Array of command line arguments passed to `vim` process.           | `string[]`                      | `[]`          |
+| `fetchFiles`       | Mapping from local filesystem paths to remote resources like URLs. | `{ [fpath: string]: string }`   | `undefined`   |
+| `onVimCreated`     | Callback called at creating a `VimWasm` instance.                  | `(VimWasm) => void`             | `undefined`   |
+| `onError`          | Callback called when an error is thrown in worker.                 | `(Error) => void`               | `undefined`   |
+| `onVimInit`        | Callback called at initializing Vim worker instance.               | `() => void`                    | `undefined`   |
+| `onVimExit`        | Callback called at Vim exiting.                                    | `(number) => void`              | `undefined`   |
+| `onFileExport`     | Callback called when `:export` is run.                             | `(string, ArrayBuffer) => void` | `undefined`   |
+| `onTitleUpdate`    | Callback called when window title is updated.                      | `(string) => void`              | `undefined`   |
+| `readClipboard`    | Async function to read a clipboard text.                           | `async () => string`            | `undefined`   |
+| `onWriteClipboard` | Async function to write a clipboard text.                          | `async (string) => void`        | `undefined`   |
+| `drawer`           | User-defined screen drawer instance (see below section).           | `ScreenDrawer`                  | `undefined`   |
 
 All properties other than `worker` are optional. For filetype support, please read
 [these docs](https://github.com/rhysd/vim.wasm/tree/wasm/wasm#filesystem-setup) also.
