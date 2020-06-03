@@ -84,6 +84,6 @@
     "typescript": "^3.5.3"
   },
   "dependencies": {
-    "vim-wasm": "~0.0.10"
+    "vim-wasm": "~0.0.13"
   }
 }
