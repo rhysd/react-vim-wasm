@@ -15,6 +15,7 @@
 /// <reference path="common.d.ts"/>
 
 type PerfMark = 'init' | 'raf' | 'draw';
+type MessageEncodable = number | boolean | string;
 
 export interface ScreenDrawer {
     draw(msg: DrawEventMessage): void;
@@ -32,13 +33,18 @@ export interface KeyModifiers {
     meta?: boolean;
 }
 
-export const VIM_VERSION = '8.1.1661';
+export const VIM_VERSION = '8.2.0055';
+
+const AsyncFunction = Object.getPrototypeOf(async function() {
+    /* do nothing */
+}).constructor;
 
 function noop() {
     /* do nothing */
 }
 let debug: (...args: any[]) => void = noop;
 
+const STATUS_NOT_SET = 0 as const;
 const STATUS_NOTIFY_KEY = 1 as const;
 const STATUS_NOTIFY_RESIZE = 2 as const;
 const STATUS_NOTIFY_OPEN_FILE_BUF_COMPLETE = 3 as const;
@@ -46,6 +52,32 @@ const STATUS_NOTIFY_CLIPBOARD_WRITE_COMPLETE = 4 as const;
 const STATUS_REQUEST_CMDLINE = 5 as const;
 const STATUS_REQUEST_SHARED_BUF = 6 as const;
 const STATUS_NOTIFY_ERROR_OUTPUT = 7 as const;
+const STATUS_NOTIFY_EVAL_FUNC_RET = 8 as const;
+
+function statusName(s: EventStatusFromMain): string {
+    switch (s) {
+        case STATUS_NOT_SET:
+            return 'NOT_SET';
+        case STATUS_NOTIFY_KEY:
+            return 'NOTIFY_KEY';
+        case STATUS_NOTIFY_RESIZE:
+            return 'NOTIFY_RESIZE';
+        case STATUS_NOTIFY_OPEN_FILE_BUF_COMPLETE:
+            return 'NOTIFY_OPEN_FILE_BUF_COMPLETE';
+        case STATUS_NOTIFY_CLIPBOARD_WRITE_COMPLETE:
+            return 'NOTIFY_CLIPBOARD_WRITE_COMPLETE';
+        case STATUS_REQUEST_CMDLINE:
+            return 'REQUEST_CMDLINE';
+        case STATUS_REQUEST_SHARED_BUF:
+            return 'REQUEST_SHARED_BUF';
+        case STATUS_NOTIFY_ERROR_OUTPUT:
+            return 'NOTIFY_ERROR_OUTPUT';
+        case STATUS_NOTIFY_EVAL_FUNC_RET:
+            return 'STATUS_NOTIFY_EVAL_FUNC_RET';
+        default:
+            return `Unknown command: ${s}`;
+    }
+}
 
 export function checkBrowserCompatibility(): string | undefined {
     function notSupported(feat: string): string {
@@ -68,7 +100,11 @@ export class VimWorker {
     private readonly worker: Worker;
     private readonly onMessage: (msg: MessageFromWorker) => void;
     private readonly onError: (err: Error) => void;
-    private onOneshotMessage: Map<MessageKindFromWorker, (msg: MessageFromWorker) => void>;
+    private readonly onOneshotMessage: Map<MessageKindFromWorker, (msg: MessageFromWorker) => void>;
+    // Events are queued since an event may arrive while previous event is still being processed by
+    // worker thread. First element is a pair of status and values of an event currently being processed.
+    // Rest elements are pending events which will be processed after.
+    private readonly pendingEvents: Array<[EventStatusFromMain, MessageEncodable[]]>;
 
     constructor(scriptPath: string, onMessage: (msg: MessageFromWorker) => void, onError: (err: Error) => void) {
         this.worker = new Worker(scriptPath);
@@ -79,6 +115,7 @@ export class VimWorker {
         this.onError = onError;
         this.onOneshotMessage = new Map();
         this.debug = false;
+        this.pendingEvents = [];
     }
 
     terminate() {
@@ -93,54 +130,23 @@ export class VimWorker {
     }
 
     notifyOpenFileBufComplete(filename: string, bufId: number) {
-        let idx = 1;
-        this.sharedBuffer[idx++] = bufId;
-        idx = this.encodeStringToBuffer(filename, idx);
-
-        debug('Encoded open file buf complete event with', idx * 4, 'bytes. bufID:', bufId);
-        this.awakeWorkerThread(STATUS_NOTIFY_OPEN_FILE_BUF_COMPLETE);
+        this.enqueueEvent(STATUS_NOTIFY_OPEN_FILE_BUF_COMPLETE, bufId, filename);
     }
 
     notifyClipboardWriteComplete(cannotSend: boolean, bufId: number) {
-        this.sharedBuffer[1] = +cannotSend;
-        this.sharedBuffer[2] = bufId;
-        debug('Encoded open file buf complete event. bufID:', bufId);
-        this.awakeWorkerThread(STATUS_NOTIFY_CLIPBOARD_WRITE_COMPLETE);
+        this.enqueueEvent(STATUS_NOTIFY_CLIPBOARD_WRITE_COMPLETE, cannotSend, bufId);
     }
 
     notifyKeyEvent(key: string, keyCode: number, ctrl: boolean, shift: boolean, alt: boolean, meta: boolean) {
-        let idx = 1;
-        this.sharedBuffer[idx++] = keyCode;
-        this.sharedBuffer[idx++] = +ctrl;
-        this.sharedBuffer[idx++] = +shift;
-        this.sharedBuffer[idx++] = +alt;
-        this.sharedBuffer[idx++] = +meta;
-
-        idx = this.encodeStringToBuffer(key, idx);
-
-        debug('Encoded key event with', idx * 4, 'bytes');
-
-        this.awakeWorkerThread(STATUS_NOTIFY_KEY);
-
-        debug('Sent key event:', key, keyCode, ctrl, shift, alt, meta);
+        this.enqueueEvent(STATUS_NOTIFY_KEY, keyCode, ctrl, shift, alt, meta, key);
     }
 
     notifyResizeEvent(width: number, height: number) {
-        let idx = 1;
-        this.sharedBuffer[idx++] = width;
-        this.sharedBuffer[idx++] = height;
-
-        debug('Encoded resize event with', idx * 4, 'bytes');
-
-        this.awakeWorkerThread(STATUS_NOTIFY_RESIZE);
-
-        debug('Sent resize event:', width, height);
+        this.enqueueEvent(STATUS_NOTIFY_RESIZE, width, height);
     }
 
     async requestSharedBuffer(byteLength: number): Promise<[number, SharedArrayBuffer]> {
-        this.sharedBuffer[1] = byteLength;
-        this.awakeWorkerThread(STATUS_REQUEST_SHARED_BUF);
-        debug('Encoded shared buffer request event. Size:', byteLength);
+        this.enqueueEvent(STATUS_REQUEST_SHARED_BUF, byteLength);
 
         const msg = (await this.waitForOneshotMessage('shared-buf:response')) as SharedBufResponseFromWorker;
 
@@ -173,10 +179,7 @@ export class VimWorker {
             throw new Error('Specified command line is empty');
         }
 
-        const idx = this.encodeStringToBuffer(cmdline, 1);
-
-        debug('Encoded request cmdline event with', idx * 4, 'bytes');
-        this.awakeWorkerThread(STATUS_REQUEST_CMDLINE);
+        this.enqueueEvent(STATUS_REQUEST_CMDLINE, cmdline);
 
         const msg = (await this.waitForOneshotMessage('cmdline:response')) as CmdlineResultFromWorker;
         debug('Result of command', cmdline, ':', msg.success);
@@ -190,9 +193,114 @@ export class VimWorker {
         const [bufId, buffer] = await this.requestSharedBuffer(encoded.byteLength);
         new Uint8Array(buffer).set(encoded);
 
-        this.sharedBuffer[1] = bufId;
-        this.awakeWorkerThread(STATUS_NOTIFY_ERROR_OUTPUT);
+        this.enqueueEvent(STATUS_NOTIFY_ERROR_OUTPUT, bufId);
         debug('Sent error message output:', message);
+    }
+
+    async notifyEvalFuncRet(ret: string) {
+        const encoded = new TextEncoder().encode(ret);
+        const [bufId, buffer] = await this.requestSharedBuffer(encoded.byteLength);
+        new Uint8Array(buffer).set(encoded);
+
+        this.enqueueEvent(STATUS_NOTIFY_EVAL_FUNC_RET, false /*isError*/, bufId);
+        debug('Sent return value of evaluated JS function:', ret);
+    }
+
+    async notifyEvalFuncError(msg: string, err: Error, dontReply: boolean) {
+        const errmsg = `${msg} for jsevalfunc(): ${err.message}: ${err.stack}`;
+        if (dontReply) {
+            debug('Will send error output from jsevalfunc() though the invocation was notify-only:', errmsg);
+            return this.notifyErrorOutput(errmsg);
+        }
+
+        const encoded = new TextEncoder().encode('E9999: ' + errmsg);
+        const [bufId, buffer] = await this.requestSharedBuffer(encoded.byteLength);
+        new Uint8Array(buffer).set(encoded);
+
+        this.enqueueEvent(STATUS_NOTIFY_EVAL_FUNC_RET, true /*isError*/, bufId);
+
+        debug('Sent exception thrown by evaluated JS function:', msg, err);
+    }
+
+    onEventDone(doneStatus: EventStatusFromMain) {
+        const done = statusName(doneStatus);
+
+        // First element should be an event being processed by worker.
+        // Dequeue it and check it matches to the status notified from worker.
+        const finished = this.pendingEvents.shift();
+
+        if (finished === undefined) {
+            throw new Error(`FATAL: Received ${done} event but event queue is empty`);
+        }
+
+        if (finished[0] !== doneStatus) {
+            throw new Error(
+                `FATAL: Received ${done} event but queue says previous event was ${statusName(finished[0])} with args ${
+                    finished[1]
+                }`,
+            );
+        }
+
+        // Send next pending event if exists
+
+        if (this.pendingEvents.length === 0) {
+            debug('No pending event remains after event', done);
+            return;
+        }
+
+        debug('After', done, 'event, still', this.pendingEvents.length, 'events are pending');
+        const [status, values] = this.pendingEvents[0];
+        this.sendEvent(status, values);
+    }
+
+    private enqueueEvent(status: EventStatusFromMain, ...values: MessageEncodable[]) {
+        this.pendingEvents.push([status, values]);
+
+        if (this.pendingEvents.length > 1) {
+            debug('Other event is being handled by worker. Pending:', statusName(status), values);
+            return;
+        }
+
+        // When queue was empty, send the event immediately
+        this.sendEvent(status, values);
+    }
+
+    private sendEvent(status: EventStatusFromMain, values: MessageEncodable[]) {
+        const event = statusName(status);
+
+        // TODO: Queueing request/notification to worker and wait status byte is cleared
+        // Note: Non-zero means data remains not handled by worker yet.
+        if (this.debug) {
+            const status = Atomics.load(this.sharedBuffer, 0);
+            if (status !== STATUS_NOT_SET) {
+                console.error('INVARIANT ERROR! Status byte must be zero cleared:', event); // eslint-disable-line no-console
+            }
+        }
+
+        debug('Write event', event, 'payload to buffer:', values);
+
+        let idx = 0;
+        this.sharedBuffer[idx++] = status;
+
+        for (const value of values) {
+            switch (typeof value) {
+                case 'string':
+                    idx = this.encodeStringToBuffer(value, idx);
+                    break;
+                case 'number':
+                    this.sharedBuffer[idx++] = value;
+                    break;
+                case 'boolean':
+                    this.sharedBuffer[idx++] = +value;
+                    break;
+                default:
+                    throw new Error(`FATAL: Invalid value for payload to worker: ${value}`);
+            }
+        }
+        debug('Wrote', idx * 4, 'bytes to buffer for event', event);
+
+        Atomics.notify(this.sharedBuffer, 0, 1);
+        debug('Notified event', event, 'to worker');
     }
 
     private async waitForOneshotMessage(kind: MessageKindFromWorker) {
@@ -209,20 +317,6 @@ export class VimWorker {
             this.sharedBuffer[idx++] = s.charCodeAt(i);
         }
         return idx;
-    }
-
-    private awakeWorkerThread(event: EventStatusFromMain) {
-        // TODO: Queueing request/notification to worker and wait status byte is cleared
-        // Note: Non-zero means data remains not handled by worker yet.
-        if (this.debug) {
-            const status = Atomics.load(this.sharedBuffer, 0);
-            if (status !== 0) {
-                console.error('INVARIANT ERROR! Status byte must be zero cleared:', status); // eslint-disable-line no-console
-            }
-        }
-        Atomics.store(this.sharedBuffer, 0, event);
-        Atomics.notify(this.sharedBuffer, 0, 1);
-        debug('Notified status event', event, 'to worker');
     }
 
     private recvMessage(e: MessageEvent) {
@@ -318,7 +412,7 @@ export class InputHandler {
 
     setFont(name: string, size: number) {
         this.elem.style.fontFamily = name;
-        this.elem.style.fontSize = size + 'px';
+        this.elem.style.fontSize = `${size}px`;
     }
 
     focus() {
@@ -435,6 +529,9 @@ export class ScreenCanvas implements DrawEventHandler, ScreenDrawer {
         this.queue = [];
         this.rafScheduled = false;
         this.perf = false;
+        this.fgColor = '';
+        this.spColor = '';
+        this.fontName = '';
     }
 
     onVimInit() {
@@ -522,7 +619,7 @@ export class ScreenCanvas implements DrawEventHandler, ScreenDrawer {
         x = x * dpr;
         y = y * dpr;
 
-        let font = Math.floor(ch) + 'px ' + this.fontName;
+        let font = `${Math.floor(ch)}px ${this.fontName}`;
         if (bold) {
             font = 'bold ' + font;
         }
@@ -633,7 +730,7 @@ export class ScreenCanvas implements DrawEventHandler, ScreenDrawer {
 
     private perfMeasure(m: PerfMark, n?: string) {
         if (this.perf) {
-            performance.measure(n || m, m);
+            performance.measure(n ?? m, m);
             performance.clearMarks(m);
         }
     }
@@ -646,6 +743,7 @@ export interface StartOptions {
     persistentDirs?: string[];
     dirs?: string[];
     files?: { [fpath: string]: string };
+    fetchFiles?: { [fpath: string]: string };
     cmdArgs?: string[];
 }
 export interface OptionsRenderToDOM {
@@ -701,7 +799,7 @@ export class VimWasm {
             throw new Error('Cannot start Vim twice');
         }
 
-        const o = opts || { clipboard: navigator.clipboard !== undefined };
+        const o = opts ?? { clipboard: navigator.clipboard !== undefined };
 
         if (o.debug) {
             debug = console.log.bind(console, 'main:'); // eslint-disable-line no-console
@@ -724,10 +822,11 @@ export class VimWasm {
             debug: this.debug,
             perf: this.perf,
             clipboard: !!o.clipboard,
-            files: o.files || {},
-            dirs: o.dirs || [],
-            persistent: o.persistentDirs || [],
-            cmdArgs: o.cmdArgs || [],
+            files: o.files ?? {},
+            dirs: o.dirs ?? [],
+            fetchFiles: o.fetchFiles ?? {},
+            persistent: o.persistentDirs ?? [],
+            cmdArgs: o.cmdArgs ?? [],
         };
         this.worker.sendStartMessage(msg);
 
@@ -780,7 +879,7 @@ export class VimWasm {
     }
 
     sendKeydown(key: string, keyCode: number, modifiers?: KeyModifiers) {
-        const { ctrl = false, shift = false, alt = false, meta = false } = modifiers || {};
+        const { ctrl = false, shift = false, alt = false, meta = false } = modifiers ?? {};
         if (key.length > 1) {
             if (
                 key === 'Unidentified' ||
@@ -832,14 +931,51 @@ export class VimWasm {
     private async evalJS(path: string, contents: ArrayBuffer) {
         debug('Evaluating JavaScript file', path, 'with size', contents.byteLength, 'bytes');
         const dec = new TextDecoder();
-        const src = dec.decode(contents);
-        const globalEval = eval;
+        const src = '"use strict";' + dec.decode(contents);
         try {
-            globalEval(src);
+            // Function() is better option to evaluate JavaScript source with global scope rather than eval().
+            //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval#Do_not_ever_use_eval!
+            Function(src)();
         } catch (err) {
             debug('Failed to evaluate', path, 'with error:', err);
             await this.showError(`${err.message}\n\n${err.stack}`);
         }
+    }
+
+    private async evalFunc(body: string, args: any[], notifyOnly: boolean) {
+        debug('Evaluating JavaScript function:', body, args);
+
+        let f;
+        try {
+            f = new AsyncFunction(body);
+        } catch (err) {
+            return this.worker.notifyEvalFuncError('Could not construct function', err, notifyOnly);
+        }
+
+        let ret;
+        try {
+            ret = await f(...args);
+        } catch (err) {
+            return this.worker.notifyEvalFuncError('Exception was thrown while evaluating function', err, notifyOnly);
+        }
+
+        if (notifyOnly) {
+            debug('Evaluated JavaScript result was discarded since the message was notify-only:', ret, body);
+            return Promise.resolve();
+        }
+
+        let retJson;
+        try {
+            retJson = JSON.stringify(ret);
+        } catch (err) {
+            return this.worker.notifyEvalFuncError(
+                'Could not serialize return value as JSON from function',
+                err,
+                false,
+            );
+        }
+
+        return this.worker.notifyEvalFuncRet(retJson);
     }
 
     private onMessage(msg: MessageFromWorker) {
@@ -860,6 +996,14 @@ export class VimWasm {
                 this.screen.draw(msg.event);
                 debug('draw event', msg.event);
                 break;
+            case 'done':
+                this.worker.onEventDone(msg.status);
+                break;
+            case 'evalfunc': {
+                const args = msg.argsJson === undefined ? [] : JSON.parse(msg.argsJson);
+                this.evalFunc(msg.body, args, msg.notifyOnly).catch(this.handleError);
+                break;
+            }
             case 'title':
                 if (this.onTitleUpdate) {
                     debug('title was updated:', msg.title);
@@ -886,15 +1030,8 @@ export class VimWasm {
                 }
                 break;
             case 'export':
-                debug(
-                    'Exporting file',
-                    msg.path,
-                    'with size',
-                    msg.contents.byteLength,
-                    'bytes with',
-                    this.onFileExport,
-                );
                 if (this.onFileExport !== undefined) {
+                    debug('Exporting file', msg.path, 'with size in bytes', msg.contents.byteLength);
                     this.onFileExport(msg.path, msg.contents);
                 }
                 break;

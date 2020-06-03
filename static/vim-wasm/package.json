@@ -1,26 +1,26 @@
 {
-  "_from": "vim-wasm@~0.0.10",
-  "_id": "vim-wasm@0.0.10",
+  "_from": "vim-wasm@~0.0.13",
+  "_id": "vim-wasm@0.0.13",
   "_inBundle": false,
-  "_integrity": "sha512-xN14Bu0wrS/FWcyjRJ3utz5JWcjiRQVogfFmKmT2ZB8xC3nKworqwlzxYpvyvPRy+nmbe50dZ/OFn/KU3yZI5A==",
+  "_integrity": "sha512-2EkJ4OfMgvA/bURJeu43wqIQ4tpCJymst++Y4R/AKuQlnrvdI4hTpG2jf0yL5TrLt1ui12leLRghrwPOybyu8w==",
   "_location": "/vim-wasm",
   "_phantomChildren": {},
   "_requested": {
     "type": "range",
     "registry": true,
-    "raw": "vim-wasm@~0.0.10",
+    "raw": "vim-wasm@~0.0.13",
     "name": "vim-wasm",
     "escapedName": "vim-wasm",
-    "rawSpec": "~0.0.10",
+    "rawSpec": "~0.0.13",
     "saveSpec": null,
-    "fetchSpec": "~0.0.10"
+    "fetchSpec": "~0.0.13"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/vim-wasm/-/vim-wasm-0.0.10.tgz",
-  "_shasum": "6dbd6f7ec5206464c9cfa6355538baf79714c66b",
-  "_spec": "vim-wasm@~0.0.10",
+  "_resolved": "https://registry.npmjs.org/vim-wasm/-/vim-wasm-0.0.13.tgz",
+  "_shasum": "450a83d1eea7def4d6cf8c863c502b5b771b08ea",
+  "_spec": "vim-wasm@~0.0.13",
   "_where": "/Users/rhayasd/Develop/github.com/rhysd/react-vim-wasm",
   "author": {
     "name": "rhysd",
@@ -34,59 +34,39 @@
   "deprecated": false,
   "description": "Vim editor ported to WebAssembly",
   "devDependencies": {
-    "@types/chai": "^4.1.7",
-    "@types/karma": "^3.0.3",
+    "@types/chai": "^4.2.7",
+    "@types/http-server": "^0.10.0",
+    "@types/karma": "^3.0.5",
     "@types/mocha": "^5.2.7",
-    "@types/sinon": "^7.0.13",
-    "@typescript-eslint/eslint-plugin": "^1.11.0",
-    "@typescript-eslint/parser": "^1.11.0",
+    "@types/node": "^13.1.1",
+    "@types/puppeteer": "^2.0.0",
+    "@types/sinon": "^7.5.1",
+    "@typescript-eslint/eslint-plugin": "^2.13.0",
+    "@typescript-eslint/parser": "^2.13.0",
     "chai": "^4.2.0",
-    "eslint": "^5.16.0",
-    "eslint-config-prettier": "^4.3.0",
-    "eslint-plugin-mocha": "^5.3.0",
+    "chokidar-cli": "^2.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-mocha": "^6.2.2",
     "eslint-plugin-security": "^1.4.0",
-    "husky": "^3.0.0",
-    "karma": "^4.1.0",
+    "http-server": "^0.12.0",
+    "husky": "^3.1.0",
+    "img-diff-js": "^0.4.1",
+    "karma": "^4.4.1",
     "karma-chai": "^0.1.0",
-    "karma-chrome-launcher": "^2.2.0",
+    "karma-chrome-launcher": "^3.1.0",
     "karma-mocha": "^1.3.0",
     "karma-sinon": "^1.0.5",
-    "mocha": "^6.1.4",
+    "mocha": "^6.2.2",
     "npm-run-all": "^4.1.5",
-    "prettier": "^1.18.2",
-    "puppeteer": "^1.18.0",
-    "sinon": "^7.3.2",
-    "stylelint": "^10.1.0",
-    "stylelint-config-recommended": "^2.2.0",
-    "typescript": "^3.5.3",
+    "open": "^7.0.0",
+    "prettier": "^1.19.1",
+    "puppeteer": "^2.0.0",
+    "sinon": "^8.0.1",
+    "stylelint": "^12.0.1",
+    "stylelint-config-recommended": "^3.0.0",
+    "typescript": "^3.7.4",
     "uglify-es": "^3.3.9"
-  },
-  "eslintConfig": {
-    "extends": "eslint:recommended",
-    "env": {
-      "browser": true,
-      "node": false
-    },
-    "globals": {
-      "debug": true,
-      "VW": true,
-      "Module": true,
-      "UTF8ToString": true,
-      "autoAddDeps": true,
-      "mergeInto": true,
-      "LibraryManager": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2015
-    },
-    "rules": {
-      "no-unused-vars": [
-        "error",
-        {
-          "argsIgnorePattern": "^_$"
-        }
-      ]
-    }
   },
   "files": [
     "vim.wasm",
@@ -104,7 +84,7 @@
   "homepage": "https://github.com/rhysd/vim.wasm#readme",
   "husky": {
     "hooks": {
-      "pre-push": "npm run lint"
+      "pre-push": "npm-run-all -p lint vtest:run"
     }
   },
   "keywords": [
@@ -120,22 +100,27 @@
     "url": "git+https://github.com/rhysd/vim.wasm.git"
   },
   "scripts": {
-    "build": "npm-run-all -p build:main build:worker",
+    "build": "npm-run-all -p build:main build:worker vtest:build",
     "build:main": "tsc -d -p tsconfig.main.json",
     "build:worker": "tsc -p tsconfig.worker.json",
-    "eslint": "eslint --ignore-path .gitignore '*.ts' 'test/*.ts'",
+    "eslint": "eslint --ignore-path .gitignore '*.ts' 'test/*.ts' 'vtest/*.ts'",
     "fix": "npm-run-all -p fix:prettier fix:eslint",
-    "fix:eslint": "eslint --fix '*.ts' 'test/*.ts'",
-    "fix:prettier": "prettier --write --ignore-path .gitignore '*.ts'",
+    "fix:eslint": "eslint --fix --ignore-path .gitignore '*.ts' 'test/*.ts' 'vtest/*.ts'",
+    "fix:prettier": "prettier --write --ignore-path .gitignore '**/*.ts'",
     "karma": "karma start",
     "lint": "npm-run-all -p stylelint eslint prettier",
-    "minify": "uglifyjs --output vim.js vim.js && uglifyjs --output main.js main.js && uglifyjs --output vimwasm.js vimwasm.js",
+    "minify:common": "uglifyjs --output main.js main.js && uglifyjs --output vimwasm.js vimwasm.js",
+    "minify:normal": "uglifyjs --output vim.js vim.js",
     "minify:small": "uglifyjs --output small/vim.js small/vim.js",
-    "prepublishOnly": "npm-run-all build minify",
-    "prettier": "prettier --check --ignore-path .gitignore '*.ts'",
+    "prepublishOnly": "npm-run-all build minify:common",
+    "prettier": "prettier --check --ignore-path .gitignore '**/*.ts'",
     "preversion": "cd .. && ./build.sh release-all",
+    "serve": "http-server -p 1234",
     "stylelint": "stylelint style.css",
     "test": "karma start --single-run",
+    "vtest": "npm-run-all vtest:build vtest:run",
+    "vtest:build": "tsc -p ./vtest",
+    "vtest:run": "node ./vtest/test.js",
     "watch": "npm-run-all -p watch:main watch:worker",
     "watch:main": "tsc -p tsconfig.main.json --watch",
     "watch:worker": "tsc -p tsconfig.worker.json --watch"
@@ -143,7 +128,6 @@
   "stylelint": {
     "extends": "stylelint-config-recommended"
   },
-  "type": "module",
   "types": "./vimwasm.d.ts",
-  "version": "0.0.10"
+  "version": "0.0.13"
 }

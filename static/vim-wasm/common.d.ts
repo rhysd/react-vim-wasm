@@ -52,6 +52,7 @@ interface StartMessageFromMain {
     readonly persistent: string[];
     readonly dirs: string[];
     readonly files: { [fpath: string]: string };
+    readonly fetchFiles: { [fpath: string]: string };
     readonly cmdArgs: string[];
 }
 
@@ -64,7 +65,7 @@ interface SharedBufResponseFromWorker {
     readonly buffer: SharedArrayBuffer;
     readonly bufId: number;
 }
-type MessageFromWorkerWithoutTS =
+type MessageFromWorkerWithoutTimestamp =
     | {
           readonly kind: 'draw';
           readonly event: DrawEventMessage;
@@ -102,9 +103,19 @@ type MessageFromWorkerWithoutTS =
           readonly kind: 'eval';
           readonly path: string;
           readonly contents: ArrayBuffer;
+      }
+    | {
+          readonly kind: 'evalfunc';
+          readonly body: string;
+          readonly argsJson: string | undefined;
+          readonly notifyOnly: boolean;
+      }
+    | {
+          readonly kind: 'done';
+          readonly status: EventStatusFromMain;
       };
 
-type MessageFromWorker = MessageFromWorkerWithoutTS & { timestamp?: number };
+type MessageFromWorker = MessageFromWorkerWithoutTimestamp & { timestamp?: number };
 type MessageKindFromWorker = MessageFromWorker['kind'];
 
-type EventStatusFromMain = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type EventStatusFromMain = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;

@@ -6,13 +6,18 @@
 
 **WARNING!: This npm package is experimental until v0.1.0 beta release.**
 
+## Introduction
+
 This is an [npm][] package to install pre-built [vim.wasm][project] binary easily. This package contains:
 
 - `vim.wasm`: WebAssembly binary
 - `vim.js`: Web Worker script to drive `vim.wasm`
+- `vim.data`: Bundled preloaded files loaded into filesystem at start up
 - `vimwasm.js`: ES Module to manage lifetime of Web Worker
+- `small/vim.{wasm,js,data}`: Small feature version
 
-Please read the following instructions to use this package. You can play with [live demo][demo]
+Please read the following instructions to use this package. You can play with [live demo][demo].
+For usage of the demo, please read [usage documentation](./DEMO_USAGE.md).
 
 ## Installation
 
@@ -27,19 +32,21 @@ npm install --save vim-wasm
 **NOTE:** This npm package is currently dedicated for browsers. It does not work with Wasm interpreters
 outside browser like `node`.
 
-Please see [example directory](./example) for minimal live example.
+Please see [example directory](./example) for minimal live example and [live demo](./main.ts) for
+more complicated example.
 
 ### Prepare `index.html`
 
-`<canvas>` to render Vim screen and `<input/>` to take user input are necessary in DOM.
+Put `<canvas>` to render Vim screen and `<input/>` to take user input in HTML file.
 
 ```html
-<canvas id="vim-screen"></canvas>
+<canvas id="vim-canvas"></canvas>
 <input id="vim-input" autocomplete="off" autofocus />
 <script type="module" src="index.js" />
 ```
 
-Your script `index.js` must be loaded as `type="module"` because this npm package provides ES Module.
+Your script `index.js` must be loaded as `type="module"` because this npm package provides ES Module
+unless you use some JS source bundler.
 
 ### Prepare `index.js`
 
@@ -54,24 +61,26 @@ const vim = new VimWasm({
 
 // Setup callbacks if you need...
 
-// Start Vim
+// Start Vim (give option object if necessary)
 vim.start();
 ```
 
-`VimWasm` class is provided to manage Vim lifecycle. Please import it from `vimwasm.js` ES Module.
+`VimWasm` class is provided to manage Web Worker lifecycle where Vim is running. Please import it from
+`vimwasm.js` ES Module.
 
-`workerScriptPath` is the most important option value which represents a file path to worker script
-which runs Vim in Web Worker. By switching path to scripts for 'normal' feature Vim and 'small' feature
-Vim, you can switch feature set of Vim. Please read following 'Normal Feature and Small Feature' section.
+`workerScriptPath` is the most important option value which represents a file path to a worker script
+which runs Vim in Web Worker. By switching path to scripts `vim-wasm/vim.js` and `vim-wasm/small/vim.js`,
+you can switch feature set of Vim. Please read following 'Normal Feature and Small Feature' section.
 
 `VimWasm` provides several callbacks to interact with Vim running in Web Worker. Please check
 [example code](./example/index.js) for the callbacks setup.
 
-Finally calling `start()` method starts Vim in new Web Worker.
+Finally calling `start()` method starts Vim in new Web Worker. You can pass an options object to the
+method call to specify various options.
 
 ### Serve `index.html`
 
-Serve `index.html` with HTTP server and access to it on a browser.
+Serve `index.html` with HTTP server and access to it from a web browser.
 
 **NOTE:** This project uses [`SharedArrayBuffer`][shared-array-buffer] and [`Atomics` API][atomics-api].
 Only Chrome or Chromium-based browsers enable them by default. For Firefox and Safari, feature flag must
@@ -83,6 +92,11 @@ Following projects are related to this npm package and may be more suitable for 
 
 - [react-vim-wasm](https://github.com/rhysd/react-vim-wasm): [React](https://reactjs.org/) component for [vim.wasm][project].
   Vim editor can be embedded in your React web application.
+- [vimwasm-try-plugin](https://github.com/rhysd/vimwasm-try-plugin): Command line tool to open vim.wasm including specified
+  Vim plugin instantly. You can try Vim plugin
+  without installing it!
+- [vim.wasm.ipynb](https://github.com/nat-chan/vim.wasm.ipynb): Jupyter Notebook integration with vim.wasm.
+  [Try it online!](https://mybinder.org/v2/gh/nat-chan/vim.wasm.ipynb/gh-pages?filepath=vim.wasm.ipynb)
 
 ## Normal Feature and Small Feature
 
@@ -138,9 +152,7 @@ const vim = new VimWasm({...});
 
 ## Debug Logging
 
-Hosting this directory with web server, setting a query parameter `debug=1` to the URL enables all debug logs.
-
-As JavaScript API, passing `debug: true` to `VimWasm.start()` method call enables debug logging with `console.log`.
+Passing `debug: true` to `VimWasm.start()` method call enables debug logging with `console.log`.
 
 ```javascript
 vim.start({ debug: true });
@@ -150,10 +162,8 @@ vim.start({ debug: true });
 
 ## Performance Logging
 
-Hosting this directory with web server, a query parameter `perf=1` to the URL enables performance tracing.
+Passing `perf: true` to `VimWasm.start()` method call enables the performance tracing.
 After Vim exits (e.g. `:qall!`), it dumps performance measurements in DevTools console as tables.
-
-As JavaScript API, passing `perf: true` to `VimWasm.start()` method call enables the performance tracing.
 
 ```javascript
 vim.start({ perf: true });
@@ -161,20 +171,13 @@ vim.start({ perf: true });
 
 **Note:** For performance measurements, please ensure to use release build. Measuring with debug build does not make sense.
 
-**Note:** Please do not use `debug=1` at the same time. Outputting console logs in DevTools slows application.
-
-**Note:** 'Vim exits with status N' dialog does not show up not to prevent performance measurements.
+**Note:** Please do not use debug logging at the same time. Outputting console logs in DevTools slows application.
 
 ## Program Arguments
 
 Passing program arguments of `vim` command is supported.
 
-Hosting this directory with web server, `arg` query parameters are passed to Vim command arguments. For example,
-passing `-c 'split ~/source.c'` to Vim can be done with query parameters `?arg=-c&arg=split%20~%2fsource.c`
-(`%20` is white space and `%2f` is slash). One `arg=` query parameter is corresponding to one argument.
-
-As JavaScript API, passing `cmdArgs` option to `VimWasm.start()` method call passes the value as Vim
-command arguments.
+Passing `cmdArgs` option to `VimWasm.start()` method call passes the value as Vim command arguments.
 
 ```javascript
 vim.start({
@@ -231,8 +234,8 @@ vim.cmdline(`set guifont=${fontName}:h{fontHeight}`);
 
 ## FileSystem Setup
 
-`VimWasm.start()` method supports filesystem setup before starting Vim through `dirs`, `files` and
-`persistentDirs` options.
+`VimWasm.start()` method supports filesystem setup before starting Vim through `dirs`, `files`, `fetchFiles`
+and `persistentDirs` options.
 
 `dirs` option creates new directories on filesystem. They are created on memory using emscripten's
 `MEMFS` by default. Note that nested directory paths are not available.
@@ -287,12 +290,119 @@ vim.start({
 });
 ```
 
-## TypeScript support
+`fetchFiles` option fetches remote resources and map them to filesystem entries. It is an object whose
+keys are file paths on filesystem and values are remote resource paths (relative file paths or URLs).
+It fetches file paths or URLs just before starting Vim and put them on filesystem.
 
-[npm package][npm-pkg] provides complete TypeScript support. Type definitions are put in `vimwasm.d.ts`
+```javascript
+vim.start({
+    fetchFiles: {
+        // Fetch hosted 'vim.js' file and put it as '/foo.js' in filesystem
+        '/foo.js': '/vim.js',
+        // Fetch 'README.md' file from remote with URL and put it as '/bar.md' in filesystem
+        '/bar.md': 'https://raw.githubusercontent.com/rhysd/vim.wasm/wasm/README.md',
+    },
+});
+```
+
+By using this option, external files are easily loaded onto filesystem. For example, if you fetch plugin
+files, the plugin is available on Vim starting. [vimwasm-try-plugin][] uses this option to load specified
+Vim plugin or colorscheme.
+
+Resources (values of the object) are fetched with [`fetch()`][fetch]. Though all requests are sent
+asynchronously, Vim waits all responses. Fetching many files or too large file would slows Vim start
+up time so should be avoided.
+
+## Evaluate JavaScript from Vim script
+
+To integrate JavaScript browser APIs into Vim script, `jsevalfunc()` Vim script function is implemented.
+
+```
+jsevalfunc({script} [, {args} [, {notify_only}]])
+```
+
+The first `{script}` argument is a string of JavaScript code which represents **a function body**.
+To return a value from JavaScript to Vim script, `return` statement is necessary. Arguments are accessible
+via `arguments` object in the code.
+
+The second `{args}` optional argument is a list value which represents arguments passed to the JavaScript
+function. If it is omitted, the function will be called with no argument.
+
+The third `{notify_only}` optional argument is a number or boolean value which indicates if returned
+value from the JavaScript function call is notified back to Vim script or not. If the value is truthy,
+function body and arguments are just notified to main thread and the returned value will never be notified
+back to Vim. In the case, `jsevalfunc()` call always returns `0` and doesn't wait the JavaScript function
+call has completed. If it is omitted, the default value is `v:false`. This flag is useful when the returned
+value is not necessary since returning a value from main thread to Vim in worker may take time to serialize
+and convert values.
+
+The JavaScript code is evaluated in main thread as a JavaScript function. So DOM element and other Web APIs
+are available.
+
+```vim
+" Get Location object in JavaScript as dict
+let location = jsevalfunc('return window.location')
+
+" Get element text
+let selector = '.description'
+let text = jsevalfunc('
+        \ const elem = document.querySelector(arguments[0]);
+        \ if (elem === null) {
+        \   return null;
+        \ }
+        \ return elem.textContent;
+        \', [selector])
+
+" Run script but does not wait for the script being completed
+call jsevalfunc('document.title = arguments[0]', ['hello from Vim'], v:true)
+```
+
+Since values are passed by being encoded in JSON between Vim script, arguments passed to JavaScript function
+call and returned value from JavaScript function must be JSON serializable. As a special case, `undefined`
+is translated to `v:none` in Vim script.
+
+```vim
+" Error because funcref is not JSON serializable
+call jsevalfunc('return "hello"', [function('empty')])
+
+" Error because Function object is not JSON serializable
+let f = jsevalfunc('return fetch')
+```
+
+The JavaScript function is called in asynchronous context. So `await` operator is available as follows:
+
+```vim
+let slug = 'rhysd/vim.wasm'
+let repo = jsevalfunc('
+        \ const res = await fetch("https://api.github.com/repos/" + arguments[0]);
+        \ if (!res.ok) {
+        \   return null;
+        \ }
+        \ return JSON.parse(await res.text());
+        \ ', [slug])
+echo repo
+```
+
+`jsevalfunc()` throws an exception when:
+
+- some argument passed at 2nd argument is not JSON serializable
+- JavaScript code causes syntax error
+- evaluating JavaScript code throws an exception
+- returned value from the function call is not JSON serializable
+
+## TypeScript Support
+
+[This npm package][npm-pkg] provides complete TypeScript support. Type definitions are put in `vimwasm.d.ts`
 and automatically referenced by TypeScript compiler.
 
-## Sources
+## Ported Vim
+
+- Current version: 8.2.0055
+- Current features: normal and small
+
+## Development
+
+### Sources
 
 This directory contains a browser runtime for `wasm` GUI frontend written in [TypeScript](https://www.typescriptlang.org/).
 
@@ -308,7 +418,7 @@ be generated.  Please host this directory on web server and access to `index.htm
 
 Files are formatted by [prettier](https://prettier.io/).
 
-## Testing
+### Testing
 
 Unit tests are developed at [test](./test) directory. Since `vim.wasm` assumes to be run on browsers, they are run
 on headless Chromium using [karma](https://karma-runner.github.io/latest/index.html) test runner.
@@ -324,16 +434,22 @@ npm run karma
 
 # Use normal Chromium with DevTools instead of headless version
 npm run karma -- --browsers ChromeDebug
+
+# Apply eslint to TypeScript sources
+npm run lint
+
+# Run visual testing. It checks Vim screen is rendered correctly
+npm run vtest
 ```
 
-## Ported Vim
+`npm run lint` and `npm run vtest` are run at `git push` by [husky][] :dog:.
 
-- Current version: 8.1.1661
-- Current feature: normal and small
+`npm test` is run at [Travis CI][travis-ci] for every remote push.
 
 ## Notes
 
 ### ES Modules in Worker
+
 ES Modules and JS bundlers (e.g. parcel) are not available in worker because of `emcc`. `emcc` preprocesses input JavaScript
 source (here `runtime.js`). It parses the source but the parser only accepts specific format of JavaScript code. The preprocessor
 seems to ignore all declarations which don't appear in `mergeInto` call. Dynamic import is also not available for now.
@@ -382,3 +498,6 @@ Example code is based on https://github.com/trekhleb/javascript-algorithms.
 [prettier-badge]: https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat
 [prettier]: https://github.com/prettier/prettier
 [demo]: https://rhysd.github.io/vim.wasm
+[husky]: https://github.com/typicode/husky
+[fetch]: https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch
+[vimwasm-try-plugin]: https://github.com/rhysd/vimwasm-try-plugin

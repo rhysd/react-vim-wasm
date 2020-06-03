@@ -16,7 +16,7 @@ export interface KeyModifiers {
     alt?: boolean;
     meta?: boolean;
 }
-export declare const VIM_VERSION = "8.1.1661";
+export declare const VIM_VERSION = "8.2.0055";
 export declare function checkBrowserCompatibility(): string | undefined;
 export declare class VimWorker {
     debug: boolean;
@@ -24,7 +24,8 @@ export declare class VimWorker {
     private readonly worker;
     private readonly onMessage;
     private readonly onError;
-    private onOneshotMessage;
+    private readonly onOneshotMessage;
+    private readonly pendingEvents;
     constructor(scriptPath: string, onMessage: (msg: MessageFromWorker) => void, onError: (err: Error) => void);
     terminate(): void;
     sendStartMessage(msg: StartMessageFromMain): void;
@@ -37,9 +38,13 @@ export declare class VimWorker {
     responseClipboardText(text: string): Promise<void>;
     requestCmdline(cmdline: string): Promise<void>;
     notifyErrorOutput(message: string): Promise<void>;
+    notifyEvalFuncRet(ret: string): Promise<void>;
+    notifyEvalFuncError(msg: string, err: Error, dontReply: boolean): Promise<void>;
+    onEventDone(doneStatus: EventStatusFromMain): void;
+    private enqueueEvent;
+    private sendEvent;
     private waitForOneshotMessage;
     private encodeStringToBuffer;
-    private awakeWorkerThread;
     private recvMessage;
     private recvError;
 }
@@ -111,6 +116,9 @@ export interface StartOptions {
     files?: {
         [fpath: string]: string;
     };
+    fetchFiles?: {
+        [fpath: string]: string;
+    };
     cmdArgs?: string[];
 }
 export interface OptionsRenderToDOM {
@@ -150,6 +158,7 @@ export declare class VimWasm {
     showError(message: string): Promise<void>;
     private readFile;
     private evalJS;
+    private evalFunc;
     private onMessage;
     private handleError;
     private printPerfs;
